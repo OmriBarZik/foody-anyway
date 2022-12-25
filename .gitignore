@@ -38,3 +38,6 @@ next-env.d.ts
 # PWA files
 public/workbox-*.js*
 public/sw.js*
+
+.vercel
+.env
