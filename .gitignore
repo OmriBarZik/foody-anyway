@@ -39,5 +39,5 @@ next-env.d.ts
 public/workbox-*.js*
 public/sw.js*
 
-.vercel
-.env
+# linters
+.eslintcache
