@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint & npm run lint:prettier -- --check",
+    "lint:fix": "next lint --fix & npm run lint:prettier -- --write",
+    "lint:prettier": "prettier --cache --ignore-path .gitignore .",
     "prepare": "husky install",
     "setup": "vercel env pull .env.local"
   },
@@ -26,12 +28,15 @@
     "@types/react-dom": "^18.0.9",
     "eslint": "^8.29.0",
     "eslint-config-next": "^13.0.7",
+    "eslint-config-prettier": "^8.5.0",
     "husky": "^8.0.2",
     "lint-staged": "^13.1.0",
+    "prettier": "^2.8.1",
     "typescript": "^4.9.4",
     "vercel": "^28.10.1"
   },
   "lint-staged": {
-    "*.{ts,tsx,js}": "eslint --fix --cache"
+    "*.{ts,tsx,js}": "eslint --fix --cache",
+    "*": "prettier --cache --write --ignore-unknown"
   }
 }

@@ -3,12 +3,14 @@ import Autocomplete from "@mui/material/Autocomplete";
 import { ingredientContainer } from "./ingredients.style";
 
 interface IngredientsProps {
-  ingredients: string[],
-  selectedIngredients: (props: string[]) => void
+  ingredients: string[];
+  selectedIngredients: (props: string[]) => void;
 }
 
-export default function Ingredients({ ingredients, selectedIngredients }: IngredientsProps) {
-
+export default function Ingredients({
+  ingredients,
+  selectedIngredients,
+}: IngredientsProps) {
   return (
     <div css={ingredientContainer}>
       <Autocomplete
@@ -19,7 +21,7 @@ export default function Ingredients({ ingredients, selectedIngredients }: Ingred
         size="small"
         options={ingredients}
         noOptionsText={<a>Add new Ingredient</a>}
-        onChange={(e, value)=> selectedIngredients(value)}
+        onChange={(e, value) => selectedIngredients(value)}
         // getOptionLabel={(option) => option.title}
         renderInput={(params) => {
           return (

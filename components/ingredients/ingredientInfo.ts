@@ -9,6 +9,6 @@ export function getIngredients() {
     { _id: 7, name: "salt" },
     { _id: 8, name: "peper" },
     { _id: 9, name: "rice" },
-    { _id: 10, name: "souce" }
-  ]
+    { _id: 10, name: "souce" },
+  ];
 }
