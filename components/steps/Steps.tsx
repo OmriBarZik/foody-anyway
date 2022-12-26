@@ -4,34 +4,33 @@ import { AdminsContext } from "../context";
 import { stepsContainer } from "./steps.style";
 
 export default function Steps(): JSX.Element {
-  const [stepArr, setStepArr] = useState<string[]>([""])
   const { stepsArr, setStepsArr } = useContext(AdminsContext)
   function testKeyDown(e: React.KeyboardEvent<HTMLInputElement | HTMLDivElement>, ID: number) {
     const eventValue: string = (e.target as HTMLInputElement).value
     if (e.key === "Enter") {
       if (eventValue !== "") {
-        stepArr.splice(ID + 1, 0, "")
-        setStepArr([...stepArr])
+        stepsArr.splice(ID + 1, 0, "")
+        setStepsArr([...stepsArr])
       }
     }
 
     if (e.key === "Backspace") {
-      if (eventValue === "" && stepArr.length > 1) {
-        const deletedArr = stepArr.filter((value, index) => index !== ID)
-        setStepArr([...deletedArr])
+      if (eventValue === "" && stepsArr.length > 1) {
+        const deletedArr = stepsArr.filter((value, index) => index !== ID)
+        setStepsArr([...deletedArr])
       }
     }
   }
 
   function updateValue(e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>, ID: number) {
     const eventValue = (e.target as HTMLInputElement).value
-    stepArr[ID] = eventValue
-    setStepArr([...stepArr])
+    stepsArr[ID] = eventValue
+    setStepsArr([...stepsArr])
   }
 
   return (
     <div css={stepsContainer}>
-      {stepArr.map((value, index) =>
+      {stepsArr.map((value, index) =>
         <TextField
           value={value}
           onChange={(e) => updateValue(e, index)}
