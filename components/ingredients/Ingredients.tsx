@@ -1,20 +1,15 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import { getIngredients } from "./ingredientInfo";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
-import { css } from "@emotion/react";
 import { AdminsContext } from "../context";
+import { ingredientContainer } from "./ingredients.style";
 
 export default function Ingredients() {
   const { IngredientsArr, setIngredientsArr } = useContext(AdminsContext);
   const ingredients = getIngredients();
   let ingredientList = [];
   ingredientList = ingredients.map((value) => value.name)
-
-  const ingredientContainer = css`
-    width: 40%;
-    float: left;
-  `;
 
   return (
     <div css={ingredientContainer}>

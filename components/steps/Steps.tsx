@@ -1,8 +1,7 @@
 import TextField from "@mui/material/TextField";
-import { display } from "@mui/system";
 import React, { useContext, useState } from "react";
-import { css } from '@emotion/react';
 import { AdminsContext } from "../context";
+import { stepsContainer } from "./steps.style";
 
 export default function Steps(): JSX.Element {
   const [stepArr, setStepArr] = useState<string[]>([""])
@@ -29,13 +28,6 @@ export default function Steps(): JSX.Element {
     stepArr[ID] = eventValue
     setStepArr([...stepArr])
   }
-
-  const stepsContainer = css`
-    width: 55%;
-    display: flex;
-    flex-direction:column;
-    margin-left: 12px;
-   `
 
   return (
     <div css={stepsContainer}>
