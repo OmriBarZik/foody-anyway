@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "prepare": "husky install",
-    "setup": "vercel env pull"
+    "setup": "vercel env pull .env.local"
   },
   "dependencies": {
     "@emotion/react": "^11.10.5",
