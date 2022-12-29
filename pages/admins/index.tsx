@@ -4,7 +4,12 @@ import { useState } from "react";
 import { AdminsContext, shareInfoType } from "../../components/context";
 import { getIngredients } from "../../components/ingredients/ingredientInfo";
 import { TextField } from "@mui/material";
-import { bodyContainer, button, container, titleStyle } from "./index.style";
+import {
+  bodyContainer,
+  button,
+  container,
+  titleStyle,
+} from "../../styles/admins/index.style";
 import Button from "@mui/material/Button";
 
 export default function Testy() {
