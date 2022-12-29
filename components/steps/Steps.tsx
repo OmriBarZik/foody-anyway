@@ -10,7 +10,7 @@ export default function Steps(): JSX.Element {
     ID: number
   ) {
     const eventValue: string = (e.target as HTMLInputElement).value;
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && e.ctrlKey === true) {
       if (eventValue !== "") {
         stepsArr.splice(ID + 1, 0, "");
         setStepsArr([...stepsArr]);
@@ -38,12 +38,15 @@ export default function Steps(): JSX.Element {
     <div css={stepsContainer}>
       {stepsArr.map((value, index) => (
         <TextField
+          multiline
           value={value}
           onChange={(e) => updateValue(e, index)}
           key={index}
           onKeyDown={(e) => testKeyDown(e, index)}
           placeholder={`step ${index + 1}...`}
-          variant="standard"
+          variant="outlined"
+          size="small"
+          autoFocus
         ></TextField>
       ))}
     </div>
