@@ -1,16 +1,18 @@
-import { ObjectId } from "mongodb";
+import { Collection, ObjectId } from "mongodb";
 import { Ingredient } from "../models/ingredient";
 import clientPromise from "./mongodb";
 
 export const COLLECTION_NAME = "ingredient";
 
-export async function getCollection() {
+export async function getCollection(): Promise<Collection<Ingredient>> {
   const client = await clientPromise;
 
   return client.db().collection<Ingredient>(COLLECTION_NAME);
 }
 
-export async function addIngredient(ingredient: Omit<Ingredient, "_id">) {
+export async function addIngredient(
+  ingredient: Omit<Ingredient, "_id">
+): Promise<Ingredient | null> {
   const collection = await getCollection();
 
   const insertData = await collection.insertOne(ingredient);
@@ -25,7 +27,7 @@ export async function addIngredient(ingredient: Omit<Ingredient, "_id">) {
 export async function updateIngredient(
   id: string,
   ingredient: Partial<Ingredient>
-) {
+): Promise<Ingredient | null> {
   const collection = await getCollection();
 
   const updatedIngredient = await collection.findOneAndUpdate(
@@ -37,7 +39,7 @@ export async function updateIngredient(
   return updatedIngredient.value;
 }
 
-export async function getIngredient(id: string) {
+export async function getIngredient(id: string): Promise<Ingredient | null> {
   const collection = await getCollection();
 
   return collection.findOne({ _id: new ObjectId(id) });
@@ -51,7 +53,7 @@ export async function getIngredients(): Promise<Ingredient[]> {
   return ingredients.toArray();
 }
 
-export async function removeIngredient(id: string) {
+export async function removeIngredient(id: string): Promise<Ingredient | null> {
   const collection = await getCollection();
 
   const deletedIngredient = await collection.findOneAndDelete({
