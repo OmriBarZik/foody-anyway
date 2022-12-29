@@ -3,6 +3,9 @@ import Ingredients from "../../components/ingredients/Ingredients";
 import { useState } from "react";
 import { AdminsContext, shareInfoType } from "../../components/context";
 import { getIngredients } from "../../components/ingredients/ingredientInfo";
+import { TextField } from "@mui/material";
+import { bodyContainer, button, container, titleStyle } from "./index.style";
+import Button from "@mui/material/Button";
 
 export default function Testy() {
   const ingredients = getIngredients();
@@ -24,34 +27,42 @@ export default function Testy() {
   };
 
   return (
-    <AdminsContext.Provider value={shareInfo}>
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.currentTarget.value)}
-        placeholder="title"
-      ></input>
-      <input
-        value={url}
-        onChange={(e) => setURL(e.currentTarget.value)}
-        placeholder="url"
-      ></input>
-      <Ingredients
-        selectedIngredients={(e) => setIngredientsArr(e)}
-        ingredients={ingredients.map((value) => value.name)}
-      />
-      <Steps />
-      <button
-        onClick={() =>
-          console.log({
-            title: title,
-            url: url,
-            chosenIngredients: IngredientsArr,
-            steps: stepsArr,
-          })
-        }
-      >
-        save
-      </button>
-    </AdminsContext.Provider>
+    <div css={container}>
+      <AdminsContext.Provider value={shareInfo}>
+        <TextField
+          size="small"
+          css={titleStyle}
+          variant="outlined"
+          value={title}
+          onChange={(e) => setTitle(e.currentTarget.value)}
+          placeholder="title"
+        ></TextField>
+        <input
+          value={url}
+          onChange={(e) => setURL(e.currentTarget.value)}
+          placeholder="url"
+        ></input>
+        <div css={bodyContainer}>
+          <Ingredients
+            selectedIngredients={(e) => setIngredientsArr(e)}
+            ingredients={ingredients.map((value) => value.name)}
+          />
+          <Steps />
+        </div>
+        <Button
+          css={button}
+          onClick={() =>
+            console.log({
+              title: title,
+              url: url,
+              chosenIngredients: IngredientsArr,
+              steps: stepsArr,
+            })
+          }
+        >
+          save
+        </Button>
+      </AdminsContext.Provider>
+    </div>
   );
 }
