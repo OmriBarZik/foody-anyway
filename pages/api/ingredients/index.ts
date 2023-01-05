@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Ingredient } from "../../../models/ingredient";
-import { getIngredients } from "../../../lib/ingredient";
+import { ingredientClient } from "../../../lib/ingredient";
 
 export default async function ingredientHandler(
   req: NextApiRequest,
@@ -20,7 +20,7 @@ export default async function ingredientHandler(
 
 async function getHandler(res: NextApiResponse) {
   try {
-    const ingredients = await getIngredients();
+    const ingredients = await ingredientClient.getAll();
 
     if (!ingredients) {
       console.error({ ingredients });

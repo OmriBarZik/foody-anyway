@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { addIngredient } from "../../../lib/ingredient";
+import { ingredientClient } from "../../../lib/ingredient";
 import { Ingredient, IngredientSchema } from "../../../models/ingredient";
 
 export default async function ingredientHandler(
@@ -28,7 +28,7 @@ export default async function ingredientHandler(
 
 async function postHandler(body: Ingredient, res: NextApiResponse) {
   try {
-    const ingredient = await addIngredient(body);
+    const ingredient = await ingredientClient.add(body);
 
     if (!ingredient) {
       console.error({ ingredient, body });

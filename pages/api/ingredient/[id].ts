@@ -1,10 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { Ingredient, IngredientSchema } from "../../../models/ingredient";
-import {
-  getIngredient,
-  removeIngredient,
-  updateIngredient,
-} from "../../../lib/ingredient";
+import { ingredientClient } from "../../../lib/ingredient";
 import { ObjectId } from "mongodb";
 
 export default async function ingredientHandler(
@@ -39,7 +35,7 @@ export default async function ingredientHandler(
 
 async function getHandler(id: string, res: NextApiResponse) {
   try {
-    const ingredient = await getIngredient(id);
+    const ingredient = await ingredientClient.get(id);
 
     if (!ingredient) {
       console.error({ ingredient, id });
@@ -70,7 +66,7 @@ async function putHandler(
   delete result.data._id;
 
   try {
-    const ingredient = await updateIngredient(id, result.data);
+    const ingredient = await ingredientClient.update(id, result.data);
 
     if (!ingredient) {
       console.error({ ingredient, id });
@@ -87,7 +83,7 @@ async function putHandler(
 
 async function deleteHandler(id: string, res: NextApiResponse) {
   try {
-    const ingredient = await removeIngredient(id);
+    const ingredient = await ingredientClient.remove(id);
 
     if (!ingredient) {
       console.error({ ingredient, id });
