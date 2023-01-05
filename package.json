@@ -6,8 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint & npm run lint:prettier -- --check",
-    "lint:fix": "next lint --fix & npm run lint:prettier -- --write",
+    "lint": "next lint && npm run lint:prettier -- --check",
+    "lint:fix": "next lint --fix && npm run lint:prettier -- --write",
     "lint:prettier": "prettier --cache --ignore-path .gitignore .",
     "prepare": "husky install",
     "setup": "vercel env pull .env.local"
