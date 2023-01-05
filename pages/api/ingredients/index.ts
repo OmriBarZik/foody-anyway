@@ -4,7 +4,7 @@ import { ingredientClient } from "../../../lib/ingredient";
 
 export default async function ingredientHandler(
   req: NextApiRequest,
-  res: NextApiResponse<Ingredient>
+  res: NextApiResponse<Ingredient[]>
 ) {
   const { method } = req;
 
@@ -18,7 +18,7 @@ export default async function ingredientHandler(
   }
 }
 
-async function getHandler(res: NextApiResponse) {
+async function getHandler(res: NextApiResponse<Ingredient[]>) {
   try {
     const ingredients = await ingredientClient.getAll();
 

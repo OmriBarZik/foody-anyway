@@ -26,7 +26,7 @@ export default async function ingredientHandler(
   }
 }
 
-async function postHandler(body: Ingredient, res: NextApiResponse) {
+async function postHandler(body: Ingredient, res: NextApiResponse<Ingredient>) {
   try {
     const ingredient = await ingredientClient.add(body);
 

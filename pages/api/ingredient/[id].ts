@@ -33,7 +33,7 @@ export default async function ingredientHandler(
   }
 }
 
-async function getHandler(id: string, res: NextApiResponse) {
+async function getHandler(id: string, res: NextApiResponse<Ingredient>) {
   try {
     const ingredient = await ingredientClient.get(id);
 
@@ -53,7 +53,7 @@ async function getHandler(id: string, res: NextApiResponse) {
 async function putHandler(
   id: string,
   req: NextApiRequest,
-  res: NextApiResponse
+  res: NextApiResponse<Ingredient>
 ) {
   const result = await IngredientSchema.safeParseAsync(req.body);
 
@@ -81,7 +81,7 @@ async function putHandler(
   }
 }
 
-async function deleteHandler(id: string, res: NextApiResponse) {
+async function deleteHandler(id: string, res: NextApiResponse<Ingredient>) {
   try {
     const ingredient = await ingredientClient.remove(id);
 
