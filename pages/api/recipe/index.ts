@@ -1,14 +1,14 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { ingredientClient } from "../../../lib/ingredient";
-import { Ingredient, IngredientSchema } from "../../../models/ingredient";
+import { recipeClient } from "../../../lib/recipe";
+import { Recipe, RecipeSchema } from "../../../models";
 
 export default async function ingredientHandler(
   req: NextApiRequest,
-  res: NextApiResponse<Ingredient>
+  res: NextApiResponse<Recipe>
 ) {
   const { method } = req;
 
-  const result = await IngredientSchema.safeParseAsync(req.body);
+  const result = await RecipeSchema.safeParseAsync(req.body);
 
   if (!result.success) {
     console.error(result.error);
@@ -26,9 +26,9 @@ export default async function ingredientHandler(
   }
 }
 
-async function postHandler(body: Ingredient, res: NextApiResponse<Ingredient>) {
+async function postHandler(body: Recipe, res: NextApiResponse<Recipe>) {
   try {
-    const ingredient = await ingredientClient.add(body);
+    const ingredient = await recipeClient.add(body);
 
     if (!ingredient) {
       console.error({ ingredient, body });

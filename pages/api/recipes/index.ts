@@ -1,10 +1,10 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Ingredient } from "../../../models/ingredient";
-import { ingredientClient } from "../../../lib/ingredient";
+import { recipeClient } from "../../../lib/recipe";
+import { Recipe } from "../../../models";
 
 export default async function ingredientHandler(
   req: NextApiRequest,
-  res: NextApiResponse<Ingredient[]>
+  res: NextApiResponse<Recipe[]>
 ) {
   const { method } = req;
 
@@ -18,9 +18,9 @@ export default async function ingredientHandler(
   }
 }
 
-async function getHandler(res: NextApiResponse<Ingredient[]>) {
+async function getHandler(res: NextApiResponse<Recipe[]>) {
   try {
-    const ingredients = await ingredientClient.getAll();
+    const ingredients = await recipeClient.getAll();
 
     if (!ingredients) {
       console.error({ ingredients });
