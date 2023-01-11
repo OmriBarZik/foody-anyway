@@ -5,7 +5,7 @@ import { useSession, signIn, getProviders } from "next-auth/react";
 export default function SignIn({ providers }: any) {
   const router = useRouter();
   const { data: session } = useSession();
-  session && session.user && router.replace("/");
+  if (session && session.user) router.replace("/");
 
   return (
     <div css>
