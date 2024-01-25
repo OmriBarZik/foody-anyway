@@ -4,10 +4,9 @@ import { IngredientSchema } from "./ingredient";
 
 export const RecipeSchema = z.object({
   _id: z.instanceof(ObjectId).optional(),
-  name: z.string(),
-  steps: z.array(z.string()),
+  title: z.string(),
   ingredients: z.array(IngredientSchema),
-  image: z.string(),
+  description: z.string(),
 });
 
 export type Recipe = z.infer<typeof RecipeSchema>;
