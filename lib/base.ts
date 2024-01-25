@@ -9,7 +9,7 @@ type DocumentType = {
 const getIdObj = <T>(id: string | ObjectId): WithId<T> =>
   ({
     _id: typeof id === "string" ? new ObjectId(id) : id,
-  } as WithId<T>);
+  }) as WithId<T>;
 
 export class BaseClient<T extends DocumentType> {
   readonly COLLECTION_NAME;
@@ -38,14 +38,14 @@ export class BaseClient<T extends DocumentType> {
 
   async update(
     id: string | ObjectId,
-    ingredient: T
+    ingredient: T,
   ): Promise<WithId<T> | null> {
     const collection = await this.getCollection();
 
     const updatedIngredient = await collection.findOneAndUpdate(
       getIdObj(id),
       { $set: ingredient },
-      { returnDocument: "after" }
+      { returnDocument: "after" },
     );
 
     return updatedIngredient.value;
