@@ -1,5 +1,5 @@
 import clientPromise from "./mongodb";
-import { ObjectId, OptionalUnlessRequiredId, Document, WithId } from "mongodb";
+import { ObjectId, OptionalUnlessRequiredId, WithId } from "mongodb";
 
 type DocumentType = {
   _id?: ObjectId;
@@ -48,7 +48,7 @@ export class BaseClient<T extends DocumentType> {
       { returnDocument: "after" },
     );
 
-    return updatedIngredient.value;
+    return updatedIngredient?.value;
   }
 
   async get(id: string | ObjectId) {
@@ -70,6 +70,6 @@ export class BaseClient<T extends DocumentType> {
 
     const deletedIngredient = await collection.findOneAndDelete(getIdObj(id));
 
-    return deletedIngredient.value;
+    return deletedIngredient?.value;
   }
 }
