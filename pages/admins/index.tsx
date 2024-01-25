@@ -1,20 +1,12 @@
-import Steps from "../../components/steps/Steps";
-import Ingredients from "../../components/ingredients/Ingredients";
+import { Box, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { useState } from "react";
-import { AdminsContext, shareInfoType } from "../../components/context";
-import { getIngredients } from "../../components/ingredients/ingredientInfo";
-import { TextField } from "@mui/material";
-import {
-  bodyContainer,
-  button,
-  container,
-  titleStyle,
-} from "../../styles/admins/index.style";
-import Button from "@mui/material/Button";
+import useSWR from "swr";
+import { shareInfoType } from "../../components/context";
+import { fetcher } from "../../components/fetcher";
+import { Ingredient } from "../../models";
+import { container } from "../../styles/admins/index.style";
 
 export default function Testy() {
-  const ingredients = getIngredients();
-
   const [stepsArr, setStepsArr] = useState<string[]>([""]);
   const [IngredientsArr, setIngredientsArr] = useState<string[]>([]);
   const [title, setTitle] = useState<string>("");
@@ -31,43 +23,40 @@ export default function Testy() {
     setURL,
   };
 
+  const { data, error, isLoading } = useSWR<Ingredient[]>(
+    "/api/ingredients",
+    fetcher
+  );
+
   return (
     <div css={container}>
-      <AdminsContext.Provider value={shareInfo}>
-        <TextField
-          size="small"
-          css={titleStyle}
-          variant="outlined"
-          value={title}
-          onChange={(e) => setTitle(e.currentTarget.value)}
-          placeholder="title"
-        ></TextField>
-        <input
-          value={url}
-          onChange={(e) => setURL(e.currentTarget.value)}
-          placeholder="url"
-        ></input>
-        <div css={bodyContainer}>
-          <Ingredients
-            selectedIngredients={(e) => setIngredientsArr(e)}
-            ingredients={ingredients.map((value) => value.name)}
-          />
-          <Steps />
-        </div>
-        <Button
-          css={button}
-          onClick={() =>
-            console.log({
-              title: title,
-              url: url,
-              chosenIngredients: IngredientsArr,
-              steps: stepsArr,
-            })
-          }
-        >
-          save
-        </Button>
-      </AdminsContext.Provider>
+      {isLoading && <p>loading...</p>}
+
+      {error && <div>failed to load</div>}
+
+      {data && (
+        <Box sx={{ minWidth: 120 }}>
+          <FormControl fullWidth>
+            <InputLabel id="demo-simple-select-label">Ingredient</InputLabel>
+            <Select
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              // value={age}
+              label="Ingredient"
+              // onChange={handleChange}
+            >
+              {data.map((ingredient, i: number) => (
+                <MenuItem
+                  key={ingredient.name + i}
+                  value={ingredient._id?.toString()}
+                >
+                  {ingredient.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+      )}
     </div>
   );
 }
