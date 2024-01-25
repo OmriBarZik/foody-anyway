@@ -1,11 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { Ingredient, IngredientSchema } from "../../../models/ingredient";
-import { ingredientClient } from "../../../lib/ingredient";
+import { Recipe, RecipeSchema } from "../../../models";
+import { recipeClient } from "../../../lib/recipe";
 import { ObjectId } from "mongodb";
 
 export default async function ingredientHandler(
   req: NextApiRequest,
-  res: NextApiResponse<Ingredient>
+  res: NextApiResponse<Recipe>,
 ) {
   const {
     query: { id },
@@ -33,9 +33,9 @@ export default async function ingredientHandler(
   }
 }
 
-async function getHandler(id: string, res: NextApiResponse<Ingredient>) {
+async function getHandler(id: string, res: NextApiResponse<Recipe>) {
   try {
-    const ingredient = await ingredientClient.get(id);
+    const ingredient = await recipeClient.get(id);
 
     if (!ingredient) {
       console.error({ ingredient, id });
@@ -53,9 +53,9 @@ async function getHandler(id: string, res: NextApiResponse<Ingredient>) {
 async function putHandler(
   id: string,
   req: NextApiRequest,
-  res: NextApiResponse<Ingredient>
+  res: NextApiResponse<Recipe>,
 ) {
-  const result = await IngredientSchema.safeParseAsync(req.body);
+  const result = await RecipeSchema.safeParseAsync(req.body);
 
   if (!result.success) {
     console.error(result.error);
@@ -66,7 +66,7 @@ async function putHandler(
   delete result.data._id;
 
   try {
-    const ingredient = await ingredientClient.update(id, result.data);
+    const ingredient = await recipeClient.update(id, result.data);
 
     if (!ingredient) {
       console.error({ ingredient, id });
@@ -81,9 +81,9 @@ async function putHandler(
   }
 }
 
-async function deleteHandler(id: string, res: NextApiResponse<Ingredient>) {
+async function deleteHandler(id: string, res: NextApiResponse<Recipe>) {
   try {
-    const ingredient = await ingredientClient.remove(id);
+    const ingredient = await recipeClient.remove(id);
 
     if (!ingredient) {
       console.error({ ingredient, id });
