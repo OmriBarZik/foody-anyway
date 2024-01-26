@@ -25,7 +25,7 @@ export default function Testy() {
 
   const { data, error, isLoading } = useSWR<Ingredient[]>(
     "/api/ingredients",
-    fetcher
+    fetcher,
   );
 
   return (

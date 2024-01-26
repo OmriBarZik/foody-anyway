@@ -4,7 +4,7 @@ import { Recipe, RecipeSchema } from "../../../models";
 
 export default async function ingredientHandler(
   req: NextApiRequest,
-  res: NextApiResponse<Recipe>
+  res: NextApiResponse<Recipe>,
 ) {
   const { method } = req;
 
