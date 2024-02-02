@@ -21,7 +21,7 @@ export default function RecipesManagment() {
   const [title, setTitle] = useState<string>("");
   const { data, error, isLoading } = useSWR<Ingredient[]>(
     "/api/ingredients",
-    fetcher
+    fetcher,
   );
 
   const [selectedIngredions, setSelectedIngredions] = useState<string[]>([]);

@@ -7,7 +7,7 @@ export default function Steps(): JSX.Element {
   const { stepsArr, setStepsArr } = useContext(AdminsContext);
   function testKeyDown(
     e: React.KeyboardEvent<HTMLInputElement | HTMLDivElement>,
-    ID: number
+    ID: number,
   ) {
     const eventValue: string = (e.target as HTMLInputElement).value;
     if (e.key === "Enter" && e.ctrlKey === true) {
@@ -27,7 +27,7 @@ export default function Steps(): JSX.Element {
 
   function updateValue(
     e: React.FormEvent<HTMLInputElement | HTMLTextAreaElement>,
-    ID: number
+    ID: number,
   ) {
     const eventValue = (e.target as HTMLInputElement).value;
     stepsArr[ID] = eventValue;

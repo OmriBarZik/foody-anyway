@@ -3,7 +3,7 @@ import { signIn, getProviders } from "next-auth/react";
 import GoogleButton from "react-google-button";
 import { Card } from "@mui/material";
 import { unstable_getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]";
+import { authOptions } from "../../app/api/auth/[...nextauth]/routet";
 
 export default function SignIn({ providers }: any) {
   return (
@@ -35,7 +35,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
   const session = await unstable_getServerSession(
     context.req,
     context.res,
-    authOptions
+    authOptions,
   );
   if (session?.user) {
     return {
