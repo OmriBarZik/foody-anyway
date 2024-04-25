@@ -33,6 +33,10 @@ export class BaseClient<T extends DocumentType> {
       return null;
     }
 
+    if (!insertData.insertedId) {
+      return null;
+    }
+
     return this.get(insertData.insertedId);
   }
 
