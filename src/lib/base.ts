@@ -2,11 +2,11 @@ import clientPromise from "./mongodb";
 import { ObjectId, OptionalUnlessRequiredId, WithId } from "mongodb";
 
 type DocumentType = {
-  _id?: ObjectId;
+  _id?: ObjectId | string;
   [key: string]: any;
 };
 
-const getIdObj = <T>(id: string | ObjectId): WithId<T> =>
+const getIdObj = <T>(id: DocumentType["_id"]): WithId<T> =>
   ({
     _id: typeof id === "string" ? new ObjectId(id) : id,
   }) as WithId<T>;
@@ -41,7 +41,7 @@ export class BaseClient<T extends DocumentType> {
   }
 
   async update(
-    id: string | ObjectId,
+    id: DocumentType["_id"],
     ingredient: T,
   ): Promise<WithId<T> | null> {
     const collection = await this.getCollection();
@@ -55,7 +55,7 @@ export class BaseClient<T extends DocumentType> {
     return updatedIngredient?.value;
   }
 
-  async get(id: string | ObjectId) {
+  async get(id: DocumentType["_id"]) {
     const collection = await this.getCollection();
 
     return collection.findOne(getIdObj(id));
@@ -69,7 +69,7 @@ export class BaseClient<T extends DocumentType> {
     return ingredients.toArray();
   }
 
-  async remove(id: string | ObjectId): Promise<WithId<T> | null> {
+  async remove(id: DocumentType["_id"]): Promise<WithId<T> | null> {
     const collection = await this.getCollection();
 
     const deletedIngredient = await collection.findOneAndDelete(getIdObj(id));
