@@ -1,15 +1,23 @@
-'use client';
-import Image from "next/image";
-import styles from "./page.module.css";
-import { Button, Group, useMantineColorScheme } from '@mantine/core';
+"use client";
+
+import { Button, Group, Switch, useMantineColorScheme } from "@mantine/core";
 
 export default function Home() {
-  const { setColorScheme } = useMantineColorScheme();
+  const { setColorScheme, colorScheme } = useMantineColorScheme();
   return (
-    <Group justify="center" mt="xl">
-      <Button onClick={() => setColorScheme('light')}>Light</Button>
-      <Button onClick={() => setColorScheme('dark')}>Dark</Button>
-      <Button onClick={() => setColorScheme('auto')}>Auto</Button>
+    <Group style={{marginLeft: 20}} justify="start" mt="xl">
+      <Switch
+        size="md"
+        checked={colorScheme === "dark"}
+        onChange={() =>
+          colorScheme === "dark"
+            ? setColorScheme("light")
+            : setColorScheme("dark")
+        }
+        color="dark.4"
+        onLabel={<p>Dark</p>}
+        offLabel={<p>Light</p>}
+      />
     </Group>
   );
 }
