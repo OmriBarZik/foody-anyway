@@ -7,11 +7,22 @@
     "dev": "bun --hot src/index.ts",
     "build": "bun build ./src/index.html --outdir=dist --sourcemap --target=browser --minify --define:process.env.NODE_ENV='\"production\"' --env='BUN_PUBLIC_*'",
     "start": "NODE_ENV=production bun src/index.ts",
-    "typecheck": "bun check"
+    "typecheck": "bun check",
+    "lint-staged": "lint-staged",
+    "prepare": "husky"
   },
   "dependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "react": "^19",
     "react-dom": "^19"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "bun fmt --staged",
+      "bun lint --staged --fix",
+      "bun check"
+    ]
   },
   "devDependencies": {
     "@types/react": "^19",
