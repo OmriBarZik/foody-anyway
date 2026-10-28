@@ -1,5 +1,6 @@
 [serve.static]
 env = "BUN_PUBLIC_*"
+plugins = ["./plugins/css-modules-plugin.ts"]
 
 [lint]
 typeAware = true   # also run the rules that need types

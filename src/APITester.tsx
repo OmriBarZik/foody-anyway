@@ -1,4 +1,5 @@
 import { useRef, type FormEvent } from "react";
+import styles from "./APITester.module.css";
 
 export function APITester() {
   const responseInputRef = useRef<HTMLTextAreaElement>(null);
@@ -22,9 +23,9 @@ export function APITester() {
   };
 
   return (
-    <div className="api-tester">
-      <form onSubmit={testEndpoint} className="endpoint-row">
-        <select name="method" className="method">
+    <div className={styles.apiTester}>
+      <form onSubmit={testEndpoint} className={styles.endpointRow}>
+        <select name="method" className={styles.method}>
           <option value="GET">GET</option>
           <option value="PUT">PUT</option>
         </select>
@@ -32,10 +33,10 @@ export function APITester() {
           type="text"
           name="endpoint"
           defaultValue="/api/hello"
-          className="url-input"
+          className={styles.urlInput}
           placeholder="/api/hello"
         />
-        <button type="submit" className="send-button">
+        <button type="submit" className={styles.sendButton}>
           Send
         </button>
       </form>
@@ -43,7 +44,7 @@ export function APITester() {
         ref={responseInputRef}
         readOnly
         placeholder="Response will appear here..."
-        className="response-area"
+        className={styles.responseArea}
       />
     </div>
   );

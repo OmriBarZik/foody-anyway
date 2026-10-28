@@ -1,15 +1,15 @@
 import { APITester } from "./APITester";
+import styles from "./App.module.css";
 import "./index.css";
-
 import logo from "./logo.svg";
 import reactLogo from "./react.svg";
 
 export function App() {
   return (
-    <div className="app">
-      <div className="logo-container">
-        <img src={logo} alt="Bun Logo" className="logo bun-logo" />
-        <img src={reactLogo} alt="React Logo" className="logo react-logo" />
+    <div className={styles.app}>
+      <div className={styles.logoContainer}>
+        <img src={logo} alt="Bun Logo" className={styles.bunLogo} />
+        <img src={reactLogo} alt="React Logo" className={styles.reactLogo} />
       </div>
 
       <h1>Bun + React</h1>
