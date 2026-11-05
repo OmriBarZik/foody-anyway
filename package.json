@@ -1,21 +1,24 @@
 {
-  "name": "bun-react-template",
+  "name": "foody",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --hot src/index.ts",
+    "dev": "bun --hot src/main.ts",
     "build": "bun build ./src/index.html --outdir=dist --sourcemap --target=browser --minify --define:process.env.NODE_ENV='\"production\"' --env='BUN_PUBLIC_*'",
-    "start": "NODE_ENV=production bun src/index.ts",
+    "start": "NODE_ENV=production bun src/main.ts",
+    "test": "bun test",
     "typecheck": "bun check",
     "lint-staged": "lint-staged",
     "prepare": "husky"
   },
   "dependencies": {
     "husky": "^9.1.7",
+    "i18next": "^26.7.1",
     "lint-staged": "^17.6.0",
     "react": "^19",
-    "react-dom": "^19"
+    "react-dom": "^19",
+    "react-i18next": "^17.1.11"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

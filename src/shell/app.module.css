@@ -1,0 +1,314 @@
+.page {
+  max-width: 1120px;
+  margin-inline: auto;
+  padding: 20px 20px calc(28px + env(safe-area-inset-bottom));
+  min-height: 100vh;
+}
+
+.top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px 24px;
+}
+
+.brand {
+  margin: 0;
+  font-family: "Frank Ruhl Libre", "Times New Roman", serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 700;
+  line-height: 0.95;
+}
+
+.brandRule {
+  width: 72px;
+  height: 6px;
+  margin-top: 10px;
+  border: 0;
+  background: var(--yolk);
+}
+
+.household {
+  margin: 8px 0 0;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
+}
+
+.choice,
+.textButton {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+.choice {
+  padding: 4px 0;
+}
+
+.choice[aria-pressed="true"] {
+  box-shadow: inset 0 -3px 0 var(--yolk);
+  font-weight: 600;
+}
+
+.textButton {
+  color: var(--pine);
+  font-weight: 600;
+  padding: 0;
+}
+
+.picture {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.lead {
+  max-width: 38rem;
+  font-size: 1.2rem;
+}
+
+.pineButton,
+.chiliButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  color: white;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.pineButton {
+  background: var(--pine);
+}
+
+.pineButton:hover {
+  background: var(--pine-deep);
+}
+
+.chiliButton {
+  background: var(--chili);
+}
+
+.chiliButton:hover {
+  background: var(--chili-deep);
+}
+
+.pineButton:disabled,
+.chiliButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.workspace {
+  display: block;
+  margin-top: 28px;
+}
+
+.detailColumn {
+  display: none;
+}
+
+.workspaceRecipe .listColumn {
+  display: none;
+}
+
+.workspaceRecipe .detailColumn {
+  display: block;
+}
+
+.paste {
+  margin: 28px 0 8px;
+}
+
+.pasteLabel {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.pasteRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.pasteField {
+  flex: 1 1 220px;
+  border: 0;
+  border-bottom: 2px solid var(--ink);
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 1.125rem;
+  padding: 8px 0;
+}
+
+.recipeList {
+  list-style: none;
+  margin: 28px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 28px;
+}
+
+.recipeButton {
+  display: block;
+  width: 100%;
+  padding: 0 0 8px;
+  border: 0;
+  border-inline-start: 4px solid transparent;
+  background: transparent;
+  color: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+
+.recipeButton[aria-current="true"] {
+  border-inline-start-color: var(--yolk);
+  padding-inline-start: 12px;
+}
+
+.thumb,
+.heroImage {
+  display: block;
+  width: 100%;
+  object-fit: cover;
+  background: var(--mist);
+}
+
+.thumb {
+  aspect-ratio: 16 / 10;
+}
+
+.heroImage {
+  aspect-ratio: 4 / 3;
+}
+
+.cardTitle,
+.recipeTitle {
+  font-family: "Frank Ruhl Libre", "Times New Roman", serif;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.cardTitle {
+  margin: 10px 0 4px;
+  font-size: 1.6rem;
+}
+
+.recipeTitle {
+  margin: 12px 0;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+}
+
+.meta {
+  margin: 0;
+  color: var(--pine);
+  font-weight: 600;
+}
+
+.byline,
+.detailLine {
+  margin: 4px 0 0;
+}
+
+.notice {
+  background: var(--mist);
+  padding: 12px 14px;
+  margin: 12px 0;
+}
+
+.alert {
+  color: var(--chili);
+  margin: 8px 0 0;
+}
+
+.ingredients {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ingredients li {
+  display: grid;
+  grid-template-columns: 7.5rem minmax(0, 1fr);
+  gap: 12px;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.nameOnly {
+  grid-template-columns: 1fr;
+}
+
+.amount {
+  font-weight: 600;
+}
+
+.steps {
+  max-width: 65ch;
+  margin: 0;
+  padding-inline-start: 1.25rem;
+  font-size: 1.125rem;
+  line-height: 1.55;
+}
+
+.steps li {
+  margin-block: 0.75rem;
+  padding-inline-start: 0.35rem;
+}
+
+.sectionTitle {
+  margin: 28px 0 8px;
+  font-size: 1.25rem;
+}
+
+.videoLink,
+.back {
+  color: var(--pine);
+  font-weight: 600;
+}
+
+.back {
+  display: inline-block;
+  margin-bottom: 12px;
+}
+
+.invite {
+  margin-top: 20px;
+  padding: 14px 0;
+  border-top: 1px solid var(--line);
+}
+
+@media (min-width: 960px) {
+  .workspace,
+  .workspaceRecipe {
+    display: grid;
+    grid-template-columns: 340px minmax(0, 1fr);
+    gap: 36px;
+    align-items: start;
+  }
+
+  .listColumn,
+  .detailColumn,
+  .workspaceRecipe .listColumn {
+    display: block;
+  }
+}

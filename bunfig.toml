@@ -1,3 +1,6 @@
+[fmt]
+printWidth = 120
+
 [serve.static]
 env = "BUN_PUBLIC_*"
 plugins = ["./plugins/css-modules-plugin.ts"]
