@@ -1,16 +1,57 @@
-/** Tables for people, kitchens, saved videos, and extraction costs. */
+/** Kitchen tables, plus the Better Auth tables generated for this config. */
 export const SCHEMA = `
-CREATE TABLE IF NOT EXISTS users (
-  id TEXT PRIMARY KEY,
-  google_id TEXT NOT NULL UNIQUE,
-  email TEXT NOT NULL UNIQUE,
-  name TEXT NOT NULL,
-  picture_url TEXT,
-  locale TEXT NOT NULL DEFAULT 'en' CHECK (locale IN ('en', 'he')),
-  measurement TEXT NOT NULL DEFAULT 'metric' CHECK (measurement IN ('metric', 'imperial')),
-  is_admin INTEGER NOT NULL DEFAULT 0 CHECK (is_admin IN (0, 1)),
-  created_at TEXT NOT NULL
+CREATE TABLE IF NOT EXISTS "user" (
+  "id" text not null primary key,
+  "name" text not null,
+  "email" text not null unique,
+  "emailVerified" integer not null,
+  "image" text,
+  "createdAt" date not null,
+  "updatedAt" date not null,
+  "locale" text,
+  "measurement" text,
+  "isAdmin" integer
 );
+
+CREATE TABLE IF NOT EXISTS "session" (
+  "id" text not null primary key,
+  "expiresAt" date not null,
+  "token" text not null unique,
+  "createdAt" date not null,
+  "updatedAt" date not null,
+  "ipAddress" text,
+  "userAgent" text,
+  "userId" text not null references "user" ("id") on delete cascade
+);
+
+CREATE TABLE IF NOT EXISTS "account" (
+  "id" text not null primary key,
+  "accountId" text not null,
+  "providerId" text not null,
+  "userId" text not null references "user" ("id") on delete cascade,
+  "accessToken" text,
+  "refreshToken" text,
+  "idToken" text,
+  "accessTokenExpiresAt" date,
+  "refreshTokenExpiresAt" date,
+  "scope" text,
+  "password" text,
+  "createdAt" date not null,
+  "updatedAt" date not null
+);
+
+CREATE TABLE IF NOT EXISTS "verification" (
+  "id" text not null primary key,
+  "identifier" text not null,
+  "value" text not null,
+  "expiresAt" date not null,
+  "createdAt" date not null,
+  "updatedAt" date not null
+);
+
+CREATE INDEX IF NOT EXISTS "session_userId_idx" ON "session" ("userId");
+CREATE INDEX IF NOT EXISTS "account_userId_idx" ON "account" ("userId");
+CREATE INDEX IF NOT EXISTS "verification_identifier_idx" ON "verification" ("identifier");
 
 CREATE TABLE IF NOT EXISTS households (
   id TEXT PRIMARY KEY,
@@ -19,7 +60,7 @@ CREATE TABLE IF NOT EXISTS households (
 );
 
 CREATE TABLE IF NOT EXISTS memberships (
-  user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  user_id TEXT NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
   household_id TEXT NOT NULL REFERENCES households (id) ON DELETE CASCADE,
   role TEXT NOT NULL CHECK (role IN ('owner', 'member')),
   created_at TEXT NOT NULL,
@@ -30,22 +71,15 @@ CREATE TABLE IF NOT EXISTS invites (
   id TEXT PRIMARY KEY,
   household_id TEXT NOT NULL REFERENCES households (id) ON DELETE CASCADE,
   token TEXT NOT NULL UNIQUE,
-  created_by_user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  created_by_user_id TEXT NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
   created_at TEXT NOT NULL,
   expires_at TEXT NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS sessions (
-  id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
-  expires_at TEXT NOT NULL,
-  created_at TEXT NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS recipes (
   id TEXT PRIMARY KEY,
   household_id TEXT NOT NULL REFERENCES households (id) ON DELETE CASCADE,
-  saved_by_user_id TEXT NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  saved_by_user_id TEXT NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
   source_url TEXT NOT NULL,
   platform TEXT NOT NULL CHECK (platform IN ('youtube', 'tiktok', 'instagram', 'pinterest')),
   thumbnail_url TEXT,
@@ -79,5 +113,4 @@ CREATE TABLE IF NOT EXISTS extraction_costs (
 );
 
 CREATE INDEX IF NOT EXISTS extraction_costs_recipe ON extraction_costs (recipe_id);
-CREATE INDEX IF NOT EXISTS sessions_user ON sessions (user_id);
 `;

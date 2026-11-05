@@ -1,5 +1,6 @@
 import type { Database } from "bun:sqlite";
 
+import type { FoodyAuth } from "../auth/create-foody-auth";
 import type { AppConfig } from "../config/config.types";
 import { findRecipe, listRecipes } from "../db/recipes";
 import { SaveLinkError, saveLink } from "../library/save-link";
@@ -9,8 +10,16 @@ import { pathParam, readJson } from "./request";
 import { requireUser } from "./require-user";
 
 /** Videos saved in the signed-in kitchen. */
-export function getRecipes({ request, db }: { request: Request; db: Database }): Response {
-  const current = requireUser({ db, request });
+export async function getRecipes({
+  request,
+  db,
+  auth,
+}: {
+  request: Request;
+  db: Database;
+  auth: FoodyAuth;
+}): Promise<Response> {
+  const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
     return current;
@@ -20,8 +29,16 @@ export function getRecipes({ request, db }: { request: Request; db: Database }):
 }
 
 /** One saved video, only if it is in this kitchen. */
-export function getRecipe({ request, db }: { request: Request; db: Database }): Response {
-  const current = requireUser({ db, request });
+export async function getRecipe({
+  request,
+  db,
+  auth,
+}: {
+  request: Request;
+  db: Database;
+  auth: FoodyAuth;
+}): Promise<Response> {
+  const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
     return current;
@@ -41,13 +58,15 @@ export function getRecipe({ request, db }: { request: Request; db: Database }): 
 export async function postRecipe({
   request,
   db,
+  auth,
   config,
 }: {
   request: Request;
   db: Database;
+  auth: FoodyAuth;
   config: AppConfig;
 }): Promise<Response> {
-  const current = requireUser({ db, request });
+  const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
     return current;

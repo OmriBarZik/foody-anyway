@@ -1,31 +1,33 @@
 import type { Database } from "bun:sqlite";
 
-import { findHouseholdForUser } from "../db/households";
-import { findSession } from "../db/sessions";
-import { findUserById } from "../db/users";
+import { createHouseholdForUser, findHouseholdForUser } from "../db/households";
 import type { CurrentUser } from "./auth.types";
-import { readCookie, SESSION_COOKIE } from "./session-cookie";
+import type { FoodyAuth } from "./create-foody-auth";
 
-/** The person behind the session cookie, or null when they are signed out. */
-export function currentUser({ db, request }: { db: Database; request: Request }): CurrentUser | null {
-  const sessionId = readCookie({ request, name: SESSION_COOKIE });
-
-  if (!sessionId) {
-    return null;
-  }
-
-  const session = findSession({ db, sessionId });
+/** The person behind Better Auth's session cookie, or null when they are signed out. */
+export async function currentUser({
+  auth,
+  db,
+  request,
+}: {
+  auth: FoodyAuth;
+  db: Database;
+  request: Request;
+}): Promise<CurrentUser | null> {
+  const session = await auth.api.getSession({ headers: request.headers });
 
   if (!session) {
     return null;
   }
 
-  const user = findUserById({ db, userId: session.user_id });
-  const household = user ? findHouseholdForUser({ db, userId: user.id }) : null;
+  const existing = findHouseholdForUser({ db, userId: session.user.id });
 
-  if (!user || !household) {
-    return null;
+  if (existing) {
+    return { user: session.user, household: existing };
   }
 
-  return { user, household };
+  const name = session.user.name.trim() || "Kitchen";
+  const household = createHouseholdForUser({ db, userId: session.user.id, name });
+
+  return { user: session.user, household };
 }

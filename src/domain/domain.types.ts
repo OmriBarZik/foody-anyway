@@ -1,14 +1,6 @@
 /** English or Hebrew, the two languages the shell ships with. */
 export type Locale = "en" | "he";
 
-/** Profile fields kept from Google's userinfo response. */
-export type GoogleProfile = {
-  googleId: string;
-  email: string;
-  name: string;
-  pictureUrl: string | null;
-};
-
 /** How ingredient amounts are shown for one person. */
 export type MeasurementSystem = "metric" | "imperial";
 

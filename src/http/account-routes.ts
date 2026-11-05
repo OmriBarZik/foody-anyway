@@ -1,8 +1,8 @@
 import type { Database } from "bun:sqlite";
 
+import type { FoodyAuth } from "../auth/create-foody-auth";
 import type { AppConfig } from "../config/config.types";
 import { acceptInvite, createInvite, findHouseholdForUser, findInvitePreview } from "../db/households";
-import { updateUserSettings } from "../db/users";
 import type { Locale, MeasurementSystem } from "../domain/domain.types";
 import { isRecord } from "../shared/is-record";
 import { jsonError } from "./json-error";
@@ -11,8 +11,16 @@ import { requireUser } from "./require-user";
 import { toUserView } from "./user-view";
 
 /** The signed-in account. */
-export function getMe({ request, db }: { request: Request; db: Database }): Response {
-  const current = requireUser({ db, request });
+export async function getMe({
+  request,
+  db,
+  auth,
+}: {
+  request: Request;
+  db: Database;
+  auth: FoodyAuth;
+}): Promise<Response> {
+  const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
     return current;
@@ -22,8 +30,16 @@ export function getMe({ request, db }: { request: Request; db: Database }): Resp
 }
 
 /** Update language or measurement for the signed-in person. */
-export async function patchMe({ request, db }: { request: Request; db: Database }): Promise<Response> {
-  const current = requireUser({ db, request });
+export async function patchMe({
+  request,
+  db,
+  auth,
+}: {
+  request: Request;
+  db: Database;
+  auth: FoodyAuth;
+}): Promise<Response> {
+  const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
     return current;
@@ -46,19 +62,38 @@ export async function patchMe({ request, db }: { request: Request; db: Database 
     return measurement;
   }
 
-  const user = updateUserSettings({ db, userId: current.user.id, locale, measurement });
-  const household = findHouseholdForUser({ db, userId: current.user.id });
-
-  if (!user || !household) {
-    return jsonError({ status: 404, code: "sign_in" });
+  if (locale || measurement) {
+    await auth.api.updateUser({
+      body: {
+        ...(locale ? { locale } : {}),
+        ...(measurement ? { measurement } : {}),
+      },
+      headers: request.headers,
+    });
   }
 
-  return Response.json(toUserView({ user, household }));
+  const refreshed = await requireUser({ auth, db, request });
+
+  if (refreshed instanceof Response) {
+    return refreshed;
+  }
+
+  return Response.json(toUserView(refreshed));
 }
 
 /** Create an invite link for this kitchen. */
-export function postInvite({ request, db, config }: { request: Request; db: Database; config: AppConfig }): Response {
-  const current = requireUser({ db, request });
+export async function postInvite({
+  request,
+  db,
+  auth,
+  config,
+}: {
+  request: Request;
+  db: Database;
+  auth: FoodyAuth;
+  config: AppConfig;
+}): Promise<Response> {
+  const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
     return current;
@@ -87,8 +122,16 @@ export function getInvite({ request, db }: { request: Request; db: Database }): 
 }
 
 /** Join the invited kitchen when this account's own kitchen is still empty. */
-export async function postAcceptInvite({ request, db }: { request: Request; db: Database }): Promise<Response> {
-  const current = requireUser({ db, request });
+export async function postAcceptInvite({
+  request,
+  db,
+  auth,
+}: {
+  request: Request;
+  db: Database;
+  auth: FoodyAuth;
+}): Promise<Response> {
+  const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
     return current;

@@ -7,15 +7,15 @@ export function toUserView({ user, household }: CurrentUser): UserView {
     id: user.id,
     name: user.name,
     email: user.email,
-    pictureUrl: user.picture_url,
+    pictureUrl: user.image ?? null,
     locale: asLocale(user.locale),
     measurement: asMeasurement(user.measurement),
-    isAdmin: user.is_admin === 1,
+    isAdmin: user.isAdmin === true,
     household: { id: household.id, name: household.name },
   };
 }
 
-function asLocale(value: string): Locale {
+function asLocale(value: string | null | undefined): Locale {
   if (value === "he") {
     return "he";
   }
@@ -23,7 +23,7 @@ function asLocale(value: string): Locale {
   return "en";
 }
 
-function asMeasurement(value: string): MeasurementSystem {
+function asMeasurement(value: string | null | undefined): MeasurementSystem {
   if (value === "imperial") {
     return "imperial";
   }

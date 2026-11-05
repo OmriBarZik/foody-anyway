@@ -1,9 +1,10 @@
 import { serve } from "bun";
 
+import { createFoodyAuth } from "./auth/create-foody-auth";
 import { readConfig } from "./config/read-config";
 import { openDb } from "./db/open-db";
 import { getInvite, getMe, patchMe, postAcceptInvite, postInvite } from "./http/account-routes";
-import { beginGoogleSignIn, finishGoogleSignIn, logout, publicConfig } from "./http/auth-routes";
+import { publicConfig } from "./http/auth-routes";
 import { getRecipe, getRecipes, postRecipe } from "./http/library-routes";
 import index from "./index.html";
 
@@ -12,14 +13,18 @@ import index from "./index.html";
  *
  *   bun --hot src/main.ts
  *
- * Serves the kitchen app and the JSON API. Reads APP_ORIGIN, PORT, FOODY_DB,
- * GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, SESSION_SECRET, GEMINI_API_KEY,
- * GEMINI_MODEL, and ADMIN_EMAILS from the environment. SESSION_SECRET is
- * required when NODE_ENV is production.
+ * Serves the kitchen app and the JSON API. Google sign-in is handled by
+ * Better Auth at /api/auth/*. The Google redirect URI is
+ * ${APP_ORIGIN}/api/auth/callback/google.
+ *
+ * Reads APP_ORIGIN, PORT, FOODY_DB, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET,
+ * SESSION_SECRET, GEMINI_API_KEY, GEMINI_MODEL, and ADMIN_EMAILS.
+ * SESSION_SECRET signs the Better Auth session and is required in production.
  */
 function main(): void {
   const config = readConfig();
   const db = openDb(config.databasePath);
+  const auth = createFoodyAuth({ db, config });
   const server = serve({
     port: config.port,
     idleTimeout: 120,
@@ -28,34 +33,27 @@ function main(): void {
       "/api/config": {
         GET: () => publicConfig(config),
       },
-      "/api/auth/google": {
-        GET: (request) => beginGoogleSignIn({ request, config }),
-      },
-      "/api/auth/google/callback": {
-        GET: (request) => finishGoogleSignIn({ request, db, config }),
-      },
-      "/api/auth/logout": {
-        POST: (request) => logout({ request, db, config }),
-      },
+      "/api/auth": (request) => auth.handler(request),
+      "/api/auth/*": (request) => auth.handler(request),
       "/api/me": {
-        GET: (request) => getMe({ request, db }),
-        PATCH: (request) => patchMe({ request, db }),
+        GET: (request) => getMe({ request, db, auth }),
+        PATCH: (request) => patchMe({ request, db, auth }),
       },
       "/api/invites": {
-        POST: (request) => postInvite({ request, db, config }),
+        POST: (request) => postInvite({ request, db, auth, config }),
       },
       "/api/invites/accept": {
-        POST: (request) => postAcceptInvite({ request, db }),
+        POST: (request) => postAcceptInvite({ request, db, auth }),
       },
       "/api/invites/:token": {
         GET: (request) => getInvite({ request, db }),
       },
       "/api/recipes": {
-        GET: (request) => getRecipes({ request, db }),
-        POST: (request) => postRecipe({ request, db, config }),
+        GET: (request) => getRecipes({ request, db, auth }),
+        POST: (request) => postRecipe({ request, db, auth, config }),
       },
       "/api/recipes/:id": {
-        GET: (request) => getRecipe({ request, db }),
+        GET: (request) => getRecipe({ request, db, auth }),
       },
     },
     development: process.env.NODE_ENV !== "production" && {

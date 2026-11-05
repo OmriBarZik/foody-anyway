@@ -1,18 +1,5 @@
 import type { Ingredient, RecipeStep } from "../domain/domain.types";
 
-/** A row in users. */
-export type UserRow = {
-  id: string;
-  google_id: string;
-  email: string;
-  name: string;
-  picture_url: string | null;
-  locale: string;
-  measurement: string;
-  is_admin: number;
-  created_at: string;
-};
-
 /** A row in households. */
 export type HouseholdRow = {
   id: string;
@@ -36,14 +23,6 @@ export type InviteRow = {
   created_by_user_id: string;
   created_at: string;
   expires_at: string;
-};
-
-/** A row in sessions. */
-export type SessionRow = {
-  id: string;
-  user_id: string;
-  expires_at: string;
-  created_at: string;
 };
 
 /** A row in recipes. JSON columns are still text here. */

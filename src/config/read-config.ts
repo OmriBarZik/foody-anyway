@@ -4,10 +4,15 @@ import type { AppConfig } from "./config.types";
 export function readConfig(): AppConfig {
   const port = readPort(process.env.PORT);
   const nodeEnv = process.env.NODE_ENV === "production" ? "production" : "development";
-  const sessionSecret = process.env.SESSION_SECRET || (nodeEnv === "development" ? "dev-only-session-secret" : "");
+  const sessionSecret =
+    process.env.SESSION_SECRET || (nodeEnv === "development" ? "dev-only-session-secret-not-for-production" : "");
 
   if (!sessionSecret) {
     throw new Error("Set SESSION_SECRET before starting Foody in production.");
+  }
+
+  if (nodeEnv === "production" && sessionSecret.length < 32) {
+    throw new Error("SESSION_SECRET must be at least 32 characters. Generate one with `openssl rand -base64 32`.");
   }
 
   const appOrigin = (process.env.APP_ORIGIN || `http://localhost:${port}`).replace(/\/$/, "");

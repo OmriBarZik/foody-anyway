@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import type { Locale } from "../../domain/domain.types";
-import { applyLocale } from "../i18n";
+import { signInWithGoogle } from "../api";
 import styles from "../app.module.css";
+import { applyLocale } from "../i18n";
 import type { AppRoute } from "../shell.types";
 
 /** The first screen: what Foody is, and Google sign-in. */
@@ -18,8 +19,7 @@ export function SignIn({
 }) {
   const { t, i18n } = useTranslation();
   const locale: Locale = i18n.language === "he" ? "he" : "en";
-  const next = route.name === "invite" ? `/invite/${encodeURIComponent(route.token)}` : "";
-  const href = next ? `/api/auth/google?next=${encodeURIComponent(next)}` : "/api/auth/google";
+  const callbackURL = route.name === "invite" ? `/invite/${encodeURIComponent(route.token)}` : "/";
 
   return (
     <main className={styles.page}>
@@ -38,9 +38,9 @@ export function SignIn({
         </p>
       ) : null}
       {google ? (
-        <a className={styles.pineButton} href={href}>
+        <button className={styles.pineButton} type="button" onClick={() => void signInWithGoogle(callbackURL)}>
           {t("signIn.button")}
-        </a>
+        </button>
       ) : (
         <button className={styles.pineButton} type="button" disabled>
           {t("signIn.button")}

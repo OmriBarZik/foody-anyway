@@ -1,3 +1,4 @@
+import { createAuthClient } from "better-auth/client";
 import type {
   AcceptInviteResult,
   InviteLink,
@@ -9,6 +10,21 @@ import type {
   UserView,
 } from "../domain/domain.types";
 import { isRecord } from "../shared/is-record";
+
+const authClient = createAuthClient();
+
+/** Send the browser to Google. Better Auth owns the callback at /api/auth/callback/google. */
+export async function signInWithGoogle(callbackURL: string): Promise<void> {
+  const result = await authClient.signIn.social({
+    provider: "google",
+    callbackURL,
+    errorCallbackURL: "/?auth=failed",
+  });
+
+  if (result.error) {
+    throw new ApiError("sign_in");
+  }
+}
 
 /** API error code the screens map to a sentence. */
 export class ApiError extends Error {
@@ -97,11 +113,11 @@ export async function acceptInvite(token: string): Promise<AcceptInviteResult> {
   );
 }
 
-/** End the session. */
+/** End the Better Auth session. */
 export async function signOut(): Promise<void> {
-  const response = await fetch("/api/auth/logout", { method: "POST" });
+  const result = await authClient.signOut();
 
-  if (!response.ok) {
+  if (result.error) {
     throw new ApiError("load_failed");
   }
 }

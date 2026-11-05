@@ -4,9 +4,9 @@ import { isRecord } from "../shared/is-record";
 import type { RecipeListRow, RecipeWrite } from "./db.types";
 
 const RECIPE_SELECT = `
-  SELECT recipes.*, users.name AS saved_by_name
+  SELECT recipes.*, "user".name AS saved_by_name
   FROM recipes
-  JOIN users ON users.id = recipes.saved_by_user_id
+  JOIN "user" ON "user".id = recipes.saved_by_user_id
 `;
 
 /** Recipes in one kitchen, newest first. */
