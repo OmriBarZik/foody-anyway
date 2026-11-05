@@ -94,3 +94,16 @@ export type DisplayAmount = {
   amountLabel: string | null;
   name: string;
 };
+
+/** Where a household keeps food. Spices are present or absent; the others have an amount. */
+export type StockLocation = "fridge" | "freezer" | "pantry" | "spices";
+
+/** One thing in the shared kitchen. */
+export type StockItemView = {
+  id: string;
+  location: StockLocation;
+  name: string;
+  amount: number | null;
+  unit: string | null;
+  present: boolean | null;
+};

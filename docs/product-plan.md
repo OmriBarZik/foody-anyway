@@ -2,7 +2,36 @@
 
 Shared kitchen app for a household. People save cooking videos, keep one kitchen inventory, and later get told what they can cook from recipes they already saved.
 
-Build the saved-video library first. Kitchen, shopping, and suggestions come after the library is real.
+The library and kitchen list mode are in the app. Guess mode, shopping, and suggestions come after.
+
+## Progress
+
+The library slice is in the app. Kitchen stock list mode is in the app. Guess mode, shopping, suggestions, the dietary profile, and the admin cost screen are not.
+
+### Library
+
+- [x] Google sign-in, a user, and a household. An invite link is the only way into an existing household.
+- [x] Paste a video link from YouTube, TikTok, Pinterest, or Instagram.
+- [x] Store the link, thumbnail, finished-dish image when one is found, and the member who saved it.
+- [x] Crawl the page, then ask Gemini to watch the video when the page is not enough. Other platforms can stay in `needs_review`.
+- [x] Show the parsed recipe: original steps, translated ingredient names, amounts in the viewer's measurement system.
+- [x] Show the household library on a phone and on a laptop.
+- [x] Record an extraction cost for each run.
+- [x] UI strings in English and Hebrew, with direction following the language.
+
+### Kitchen
+
+- [x] Shared stock for fridge, freezer, pantry, and spices. Spices are present or absent. Everything else has an amount.
+- [x] List mode: add, edit, and remove stock by hand.
+- [ ] Guess mode: swipe proposed ingredients into or out of the kitchen.
+- [ ] Expiry dates stay out until a later slice.
+
+### Later
+
+- [ ] Shopping list, including the prompt that adds missing ingredients for a saved recipe.
+- [ ] Suggestion mix of saved recipes the kitchen can make, filtered by the current user's profile.
+- [ ] Dietary profile editor (allergies, diet, dislikes, time, budget, interests).
+- [ ] Admin cost dashboard. Cost rows are already written.
 
 ## Decisions
 
@@ -61,6 +90,8 @@ All four platforms can be saved immediately. YouTube extraction is the path that
 
 ## What ships first
 
+The library slice below is built. See Progress for what is still open.
+
 The library slice:
 
 - Google sign-in, a user, and a household. Invite link to join a household.
@@ -72,7 +103,7 @@ The library slice:
 - Record extraction cost for each run.
 - UI strings in English and Hebrew, with direction following the language.
 
-Explicitly later: kitchen guess mode, list mode, shopping list, suggestion mix, dietary profile editor, admin cost dashboard UI.
+Explicitly later: kitchen guess mode, shopping list, suggestion mix, dietary profile editor, admin cost dashboard UI. Kitchen list mode is already in the app.
 
 ## Data the first slice needs
 
@@ -82,6 +113,7 @@ Explicitly later: kitchen guess mode, list mode, shopping list, suggestion mix, 
 - **Invite** — household, code or token, who created it.
 - **Recipe** — household, who saved it, source URL, platform, thumbnail URL, dish image URL, title, servings, time, ingredients in the source language and in translation, steps in the source language, source measurement system, source language, extraction status (`pending`, `ready`, `needs_review`, `failed`).
 - **Extraction cost** — recipe, provider, model, origin, USD, tokens, time.
+- **Stock item** — household, location (`fridge`, `freezer`, `pantry`, `spices`), name, amount and unit, or present/absent for spices.
 
 ## Stack notes for the build
 

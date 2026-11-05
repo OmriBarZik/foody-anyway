@@ -23,8 +23,14 @@ export type InviteRoute = {
   authError: AuthError;
 };
 
+/** The shared fridge, freezer, pantry, and spices. */
+export type StockRoute = {
+  name: "stock";
+  authError: AuthError;
+};
+
 /** Which screen the URL is showing. */
-export type AppRoute = LibraryRoute | RecipeRoute | InviteRoute;
+export type AppRoute = LibraryRoute | RecipeRoute | InviteRoute | StockRoute;
 
 /** Path plus a function that moves to another path without a reload. */
 export type RouteState = {
@@ -101,6 +107,26 @@ export type UiCopy = {
     already: string;
     conflict: string;
     missing: string;
+  };
+  stock: {
+    videos: string;
+    nav: string;
+    name: string;
+    amount: string;
+    unit: string;
+    add: string;
+    remove: string;
+    have: string;
+    missingItem: string;
+    empty: string;
+    badItem: string;
+    saveFailed: string;
+    locations: {
+      fridge: string;
+      freezer: string;
+      pantry: string;
+      spices: string;
+    };
   };
   platforms: {
     youtube: string;

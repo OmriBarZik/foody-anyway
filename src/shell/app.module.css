@@ -297,6 +297,58 @@
   border-top: 1px solid var(--line);
 }
 
+.nav {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 20px;
+}
+
+.stock {
+  display: grid;
+  gap: 28px;
+}
+
+.stockSection {
+  margin: 0;
+}
+
+.stockList {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.stockRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 12px;
+  align-items: center;
+  padding-block: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.stockCheck {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.stockEdit {
+  display: flex;
+  gap: 8px;
+}
+
+.amountField,
+.unitField {
+  width: 6.5rem;
+  border: 2px solid var(--line);
+  background: white;
+  color: var(--ink);
+  padding: 0.7rem 0.8rem;
+  font: inherit;
+}
+
 @media (min-width: 960px) {
   .workspace,
   .workspaceRecipe {

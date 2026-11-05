@@ -7,6 +7,7 @@ import type {
   MeasurementSystem,
   PublicConfig,
   RecipeView,
+  StockItemView,
   UserView,
 } from "../domain/domain.types";
 import { isRecord } from "../shared/is-record";
@@ -94,6 +95,36 @@ export async function fetchRecipe(recipeId: string): Promise<RecipeView> {
 /** Save a video link. The request waits until reading finishes. */
 export async function saveRecipe(url: string): Promise<RecipeView> {
   return readOk(await fetch("/api/recipes", { method: "POST", headers: jsonHeaders(), body: JSON.stringify({ url }) }));
+}
+
+/** Everything in the shared kitchen. */
+export async function fetchStock(): Promise<StockItemView[]> {
+  return readOk(await fetch("/api/stock"));
+}
+
+/** Add a stock item. The body matches one location's rules. */
+export async function createStock(item: Omit<StockItemView, "id">): Promise<StockItemView> {
+  return readOk(await fetch("/api/stock", { method: "POST", headers: jsonHeaders(), body: JSON.stringify(item) }));
+}
+
+/** Save edits to one stock item. */
+export async function saveStock(item: StockItemView): Promise<StockItemView> {
+  return readOk(
+    await fetch(`/api/stock/${encodeURIComponent(item.id)}`, {
+      method: "PATCH",
+      headers: jsonHeaders(),
+      body: JSON.stringify(item),
+    }),
+  );
+}
+
+/** Remove one stock item. */
+export async function removeStock(itemId: string): Promise<void> {
+  const response = await fetch(`/api/stock/${encodeURIComponent(itemId)}`, { method: "DELETE" });
+
+  if (!response.ok) {
+    throw new ApiError("save_failed");
+  }
 }
 
 /** Ask for an invite link. */

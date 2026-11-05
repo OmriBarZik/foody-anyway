@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import type { Locale, MeasurementSystem, RecipeView, UserView } from "../../domain/domain.types";
 import { ApiError, createInvite, fetchRecipe, fetchRecipes, saveRecipe, signOut, updateMe } from "../api";
 import styles from "../app.module.css";
@@ -7,6 +8,7 @@ import type { AppRoute, InviteButtonState } from "../shell.types";
 import { InviteBanner } from "./invite-banner";
 import { LibraryScreen } from "./library-screen";
 import { RecipeScreen } from "./recipe-screen";
+import { StockScreen } from "./stock-screen";
 import { TopBar } from "./top-bar";
 
 /** The signed-in kitchen: paste a video, read it, invite someone. */
@@ -23,6 +25,7 @@ export function Kitchen({
   onUser: (user: UserView) => void;
   onRefresh: () => Promise<void>;
 }) {
+  const { t } = useTranslation();
   const [recipes, setRecipes] = useState<RecipeView[]>([]);
   const [saving, setSaving] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
@@ -141,31 +144,47 @@ export function Kitchen({
         onInvite={() => void onInvite()}
         onSignOut={() => void onSignOut()}
       />
-      {settingsFailed ? <p className={styles.alert}>{settingsMessage()}</p> : null}
+      {settingsFailed ? <p className={styles.alert}>{t("settings.failed")}</p> : null}
+      <nav className={styles.nav}>
+        <button
+          type="button"
+          className={styles.choice}
+          aria-current={route.name === "stock" ? undefined : "page"}
+          onClick={() => go("/")}
+        >
+          {t("stock.videos")}
+        </button>
+        <button
+          type="button"
+          className={styles.choice}
+          aria-current={route.name === "stock" ? "page" : undefined}
+          onClick={() => go("/stock")}
+        >
+          {t("stock.nav")}
+        </button>
+      </nav>
       {route.name === "invite" ? (
         <InviteBanner token={route.token} onJoined={() => void onRefresh().then(() => go("/"))} />
       ) : null}
-      <div className={route.name === "recipe" ? styles.workspaceRecipe : styles.workspace}>
-        <div className={styles.listColumn}>
-          <LibraryScreen
-            recipes={recipes}
-            saving={saving}
-            errorCode={errorCode}
-            selectedId={selectedId}
-            onOpen={(recipeId) => go(`/recipes/${recipeId}`)}
-            onSave={(url) => void onSave(url)}
-          />
+      {route.name === "stock" ? (
+        <StockScreen />
+      ) : (
+        <div className={route.name === "recipe" ? styles.workspaceRecipe : styles.workspace}>
+          <div className={styles.listColumn}>
+            <LibraryScreen
+              recipes={recipes}
+              saving={saving}
+              errorCode={errorCode}
+              selectedId={selectedId}
+              onOpen={(recipeId) => go(`/recipes/${recipeId}`)}
+              onSave={(url) => void onSave(url)}
+            />
+          </div>
+          <div className={styles.detailColumn}>
+            <RecipeScreen recipe={recipe} measurement={user.measurement} missing={missing} onBack={() => go("/")} />
+          </div>
         </div>
-        <div className={styles.detailColumn}>
-          <RecipeScreen recipe={recipe} measurement={user.measurement} missing={missing} onBack={() => go("/")} />
-        </div>
-      </div>
+      )}
     </main>
   );
-}
-
-function settingsMessage(): string {
-  return document.documentElement.lang === "he"
-    ? "לא הצלחנו לשמור את הבחירה. נסו שוב."
-    : "Couldn't save that choice. Try again.";
 }

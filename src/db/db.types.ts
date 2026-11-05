@@ -1,4 +1,4 @@
-import type { Ingredient, RecipeStep } from "../domain/domain.types";
+import type { Ingredient, RecipeStep, StockLocation } from "../domain/domain.types";
 
 /** A row in households. */
 export type HouseholdRow = {
@@ -101,3 +101,24 @@ export type CostWrite = {
 
 /** Why an invite could not move someone into a kitchen. */
 export type AcceptInviteStatus = "joined" | "already" | "missing" | "conflict";
+
+/** A row in stock_items. */
+export type StockRow = {
+  id: string;
+  household_id: string;
+  location: string;
+  name: string;
+  amount: number | null;
+  unit: string | null;
+  present: number | null;
+  updated_at: string;
+};
+
+/** Fields for a new or edited stock item. Spices use present; other places use an amount. */
+export type StockDraft = {
+  location: StockLocation;
+  name: string;
+  amount: number | null;
+  unit: string | null;
+  present: boolean | null;
+};

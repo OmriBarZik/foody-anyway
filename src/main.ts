@@ -6,6 +6,7 @@ import { openDb } from "./db/open-db";
 import { getInvite, getMe, patchMe, postAcceptInvite, postInvite } from "./http/account-routes";
 import { publicConfig } from "./http/auth-routes";
 import { getRecipe, getRecipes, postRecipe } from "./http/library-routes";
+import { deleteStockItem, getStock, patchStock, postStock } from "./kitchen/stock-routes";
 import index from "./index.html";
 
 /**
@@ -54,6 +55,14 @@ function main(): void {
       },
       "/api/recipes/:id": {
         GET: (request) => getRecipe({ request, db, auth }),
+      },
+      "/api/stock": {
+        GET: (request) => getStock({ request, db, auth }),
+        POST: (request) => postStock({ request, db, auth }),
+      },
+      "/api/stock/:id": {
+        PATCH: (request) => patchStock({ request, db, auth }),
+        DELETE: (request) => deleteStockItem({ request, db, auth }),
       },
     },
     development: process.env.NODE_ENV !== "production" && {

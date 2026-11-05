@@ -113,4 +113,17 @@ CREATE TABLE IF NOT EXISTS extraction_costs (
 );
 
 CREATE INDEX IF NOT EXISTS extraction_costs_recipe ON extraction_costs (recipe_id);
+
+CREATE TABLE IF NOT EXISTS stock_items (
+  id TEXT PRIMARY KEY,
+  household_id TEXT NOT NULL REFERENCES households (id) ON DELETE CASCADE,
+  location TEXT NOT NULL CHECK (location IN ('fridge', 'freezer', 'pantry', 'spices')),
+  name TEXT NOT NULL,
+  amount REAL,
+  unit TEXT,
+  present INTEGER CHECK (present IS NULL OR present IN (0, 1)),
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS stock_items_household ON stock_items (household_id, location, name);
 `;

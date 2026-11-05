@@ -38,6 +38,10 @@ function parseRoute(path: string): AppRoute {
     return { name: "recipe", recipeId: decodeURIComponent(recipe[1]), authError };
   }
 
+  if (url.pathname === "/stock") {
+    return { name: "stock", authError };
+  }
+
   return { name: "library", authError };
 }
 
