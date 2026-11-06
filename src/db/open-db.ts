@@ -9,7 +9,11 @@ import { SCHEMA } from "./schema";
 export async function openDb(databaseUrl: string): Promise<ConnectedDb> {
   const pool = new Pool({
     connectionString: databaseUrl,
-    max: 1,
+    // Better Auth holds one connection in a transaction while its user hooks query on another.
+    max: 5,
+    // Fail a request instead of hanging the function when no connection frees up.
+    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 30_000,
     ssl: sslFor(databaseUrl),
   });
   const db = connectPool(pool);
