@@ -1,8 +1,9 @@
-import type { AppConfig } from "../config/config.types";
+/** Tells the sign-in screen whether Google is configured. Does not open the database. */
+export function publicConfig(): Response {
+  const clientId = process.env.GOOGLE_CLIENT_ID?.trim() ?? "";
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET?.trim() ?? "";
 
-/** Tells the sign-in screen whether Google is configured. */
-export function publicConfig(config: AppConfig): Response {
   return Response.json({
-    google: Boolean(config.googleClientId && config.googleClientSecret),
+    google: clientId.length > 0 && clientSecret.length > 0,
   });
 }

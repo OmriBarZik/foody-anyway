@@ -3,18 +3,33 @@ import { initReactI18next } from "react-i18next";
 import type { Locale } from "../domain/domain.types";
 import { englishCopy, hebrewCopy } from "./copy";
 
+let starting: Promise<void> | null = null;
+
 /** Start i18next with English and Hebrew before the first render. */
 export async function initI18n(locale: Locale): Promise<void> {
-  await i18n.use(initReactI18next).init({
-    resources: {
-      en: { translation: englishCopy },
-      he: { translation: hebrewCopy },
-    },
-    lng: locale,
-    fallbackLng: "en",
-    interpolation: { escapeValue: false },
-  });
-  applyDocument(locale);
+  if (i18n.isInitialized) {
+    await i18n.changeLanguage(locale);
+    applyDocument(locale);
+
+    return;
+  }
+
+  starting ??= i18n
+    .use(initReactI18next)
+    .init({
+      resources: {
+        en: { translation: englishCopy },
+        he: { translation: hebrewCopy },
+      },
+      lng: locale,
+      fallbackLng: "en",
+      interpolation: { escapeValue: false },
+    })
+    .then(() => {
+      applyDocument(locale);
+    });
+
+  await starting;
 }
 
 /** Switch language, direction, and the saved browser preference. */

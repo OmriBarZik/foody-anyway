@@ -23,14 +23,17 @@ export type InviteRoute = {
   authError: AuthError;
 };
 
-/** The shared fridge, freezer, pantry, and spices. */
-export type StockRoute = {
-  name: "stock";
+/** The shared fridge, freezer, pantry, and spices, plus the screens around them. */
+export type SectionName = "stock" | "guess" | "shop" | "ideas" | "profile" | "settings" | "costs";
+
+/** A kitchen screen that is not the video library. */
+export type SectionRoute = {
+  name: SectionName;
   authError: AuthError;
 };
 
 /** Which screen the URL is showing. */
-export type AppRoute = LibraryRoute | RecipeRoute | InviteRoute | StockRoute;
+export type AppRoute = LibraryRoute | RecipeRoute | InviteRoute | SectionRoute;
 
 /** Path plus a function that moves to another path without a reload. */
 export type RouteState = {
@@ -89,6 +92,9 @@ export type UiCopy = {
     servings: string;
   };
   settings: {
+    title: string;
+    language: string;
+    measurement: string;
     english: string;
     hebrew: string;
     metric: string;
@@ -127,6 +133,82 @@ export type UiCopy = {
       pantry: string;
       spices: string;
     };
+  };
+  nav: {
+    label: string;
+    videos: string;
+    stock: string;
+    guess: string;
+    shop: string;
+    ideas: string;
+    profile: string;
+    settings: string;
+    costs: string;
+  };
+  guess: {
+    lead: string;
+    have: string;
+    skip: string;
+    announcedHave: string;
+    announcedSkip: string;
+    empty: string;
+    saveFailed: string;
+  };
+  shop: {
+    name: string;
+    amount: string;
+    unit: string;
+    add: string;
+    remove: string;
+    empty: string;
+    badItem: string;
+    saveFailed: string;
+  };
+  ideas: {
+    ready: string;
+    close: string;
+    empty: string;
+    missing: string;
+    addMissing: string;
+    added: string;
+    note: string;
+    saveFailed: string;
+    open: string;
+  };
+  profile: {
+    lead: string;
+    allergies: string;
+    diet: string;
+    dislikes: string;
+    minutes: string;
+    budget: string;
+    interests: string;
+    none: string;
+    add: string;
+    save: string;
+    saved: string;
+    badProfile: string;
+    saveFailed: string;
+    diets: {
+      omnivore: string;
+      vegetarian: string;
+      vegan: string;
+      pescatarian: string;
+      kosher: string;
+      halal: string;
+    };
+    budgets: {
+      low: string;
+      medium: string;
+      high: string;
+    };
+  };
+  costs: {
+    title: string;
+    empty: string;
+    forbidden: string;
+    total: string;
+    loadFailed: string;
   };
   platforms: {
     youtube: string;

@@ -1,4 +1,4 @@
-import type { Database } from "bun:sqlite";
+import type { Db } from "../db/db.types";
 
 import type { FoodyAuth } from "../auth/create-foody-auth";
 import type { AppConfig } from "../config/config.types";
@@ -16,7 +16,7 @@ export async function getRecipes({
   auth,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
 }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
@@ -25,7 +25,7 @@ export async function getRecipes({
     return current;
   }
 
-  return Response.json(listRecipes({ db, householdId: current.household.id }));
+  return Response.json(await listRecipes({ db, householdId: current.household.id }));
 }
 
 /** One saved video, only if it is in this kitchen. */
@@ -35,7 +35,7 @@ export async function getRecipe({
   auth,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
 }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
@@ -45,7 +45,7 @@ export async function getRecipe({
   }
 
   const recipeId = pathParam({ request, index: 3 });
-  const recipe = recipeId ? findRecipe({ db, householdId: current.household.id, recipeId }) : null;
+  const recipe = recipeId ? await findRecipe({ db, householdId: current.household.id, recipeId }) : null;
 
   if (!recipe) {
     return jsonError({ status: 404, code: "not_found" });
@@ -62,7 +62,7 @@ export async function postRecipe({
   config,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
   config: AppConfig;
 }): Promise<Response> {

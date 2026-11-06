@@ -1,4 +1,4 @@
-import type { Database } from "bun:sqlite";
+import type { Db } from "../db/db.types";
 
 import type { FoodyAuth } from "../auth/create-foody-auth";
 import { deleteStock, insertStock, listStock, updateStock } from "../db/stock";
@@ -14,7 +14,7 @@ export async function getStock({
   auth,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
 }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
@@ -23,7 +23,7 @@ export async function getStock({
     return current;
   }
 
-  return Response.json(listStock({ db, householdId: current.household.id }));
+  return Response.json(await listStock({ db, householdId: current.household.id }));
 }
 
 /** Add one fridge, freezer, pantry, or spice item. */
@@ -33,7 +33,7 @@ export async function postStock({
   auth,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
 }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
@@ -48,7 +48,7 @@ export async function postStock({
     return jsonError({ status: 400, code: "bad_item" });
   }
 
-  return Response.json(insertStock({ db, householdId: current.household.id, draft }), { status: 201 });
+  return Response.json(await insertStock({ db, householdId: current.household.id, draft }), { status: 201 });
 }
 
 /** Change the name, amount, or whether a spice is in the kitchen. */
@@ -58,7 +58,7 @@ export async function patchStock({
   auth,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
 }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
@@ -74,7 +74,7 @@ export async function patchStock({
     return jsonError({ status: 400, code: "bad_item" });
   }
 
-  const saved = updateStock({ db, householdId: current.household.id, itemId, draft });
+  const saved = await updateStock({ db, householdId: current.household.id, itemId, draft });
 
   if (!saved) {
     return jsonError({ status: 404, code: "not_found" });
@@ -90,7 +90,7 @@ export async function deleteStockItem({
   auth,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
 }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
@@ -100,7 +100,7 @@ export async function deleteStockItem({
   }
 
   const itemId = pathParam({ request, index: 3 });
-  const removed = itemId ? deleteStock({ db, householdId: current.household.id, itemId }) : false;
+  const removed = itemId ? await deleteStock({ db, householdId: current.household.id, itemId }) : false;
 
   if (!removed) {
     return jsonError({ status: 404, code: "not_found" });

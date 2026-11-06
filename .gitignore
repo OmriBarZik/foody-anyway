@@ -4,6 +4,7 @@ node_modules
 # output
 out
 dist
+.next
 *.tgz
 
 # code coverage
@@ -35,3 +36,6 @@ data/
 
 # Finder (MacOS) folder config
 .DS_Store
+
+# Local tool credentials
+.cursor/mcp.json

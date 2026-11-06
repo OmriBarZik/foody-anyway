@@ -1,4 +1,4 @@
-import type { Database } from "bun:sqlite";
+import type { Db } from "../db/db.types";
 
 import type { FoodyAuth } from "../auth/create-foody-auth";
 import type { AppConfig } from "../config/config.types";
@@ -11,15 +11,7 @@ import { requireUser } from "./require-user";
 import { toUserView } from "./user-view";
 
 /** The signed-in account. */
-export async function getMe({
-  request,
-  db,
-  auth,
-}: {
-  request: Request;
-  db: Database;
-  auth: FoodyAuth;
-}): Promise<Response> {
+export async function getMe({ request, db, auth }: { request: Request; db: Db; auth: FoodyAuth }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
@@ -30,15 +22,7 @@ export async function getMe({
 }
 
 /** Update language or measurement for the signed-in person. */
-export async function patchMe({
-  request,
-  db,
-  auth,
-}: {
-  request: Request;
-  db: Database;
-  auth: FoodyAuth;
-}): Promise<Response> {
+export async function patchMe({ request, db, auth }: { request: Request; db: Db; auth: FoodyAuth }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
 
   if (current instanceof Response) {
@@ -89,7 +73,7 @@ export async function postInvite({
   config,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
   config: AppConfig;
 }): Promise<Response> {
@@ -100,7 +84,7 @@ export async function postInvite({
   }
 
   return Response.json(
-    createInvite({
+    await createInvite({
       db,
       householdId: current.household.id,
       userId: current.user.id,
@@ -110,9 +94,9 @@ export async function postInvite({
 }
 
 /** Kitchen name for an invite, without joining it. */
-export function getInvite({ request, db }: { request: Request; db: Database }): Response {
+export async function getInvite({ request, db }: { request: Request; db: Db }): Promise<Response> {
   const token = pathParam({ request, index: 3 });
-  const preview = token ? findInvitePreview({ db, token }) : null;
+  const preview = token ? await findInvitePreview({ db, token }) : null;
 
   if (!preview) {
     return jsonError({ status: 404, code: "invite_missing" });
@@ -128,7 +112,7 @@ export async function postAcceptInvite({
   auth,
 }: {
   request: Request;
-  db: Database;
+  db: Db;
   auth: FoodyAuth;
 }): Promise<Response> {
   const current = await requireUser({ auth, db, request });
@@ -144,7 +128,7 @@ export async function postAcceptInvite({
     return jsonError({ status: 400, code: "invite_missing" });
   }
 
-  const status = acceptInvite({ db, userId: current.user.id, token });
+  const status = await acceptInvite({ db, userId: current.user.id, token });
 
   if (status === "missing") {
     return jsonError({ status: 404, code: "invite_missing" });
@@ -154,7 +138,7 @@ export async function postAcceptInvite({
     return jsonError({ status: 409, code: "invite_conflict" });
   }
 
-  const household = findHouseholdForUser({ db, userId: current.user.id });
+  const household = await findHouseholdForUser({ db, userId: current.user.id });
 
   if (!household) {
     return jsonError({ status: 404, code: "invite_missing" });

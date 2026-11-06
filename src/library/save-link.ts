@@ -1,4 +1,4 @@
-import type { Database } from "bun:sqlite";
+import type { Db } from "../db/db.types";
 
 import { insertCost } from "../db/costs";
 import type { RecipeWrite } from "../db/db.types";
@@ -31,7 +31,7 @@ export async function saveLink({
   userId,
   rawUrl,
 }: {
-  db: Database;
+  db: Db;
   geminiApiKey: string | null;
   geminiModel: string;
   householdId: string;
@@ -44,7 +44,7 @@ export async function saveLink({
     throw new SaveLinkError();
   }
 
-  const existing = findRecipeBySource({ db, householdId, sourceUrl: detected.canonicalUrl });
+  const existing = await findRecipeBySource({ db, householdId, sourceUrl: detected.canonicalUrl });
 
   if (existing) {
     return existing;
@@ -60,10 +60,10 @@ export async function saveLink({
   });
 
   try {
-    insertRecipe({ db, recipe: draft });
+    await insertRecipe({ db, recipe: draft });
   } catch (error) {
     // A second save of the same link should open the first one.
-    const raced = findRecipeBySource({ db, householdId, sourceUrl: detected.canonicalUrl });
+    const raced = await findRecipeBySource({ db, householdId, sourceUrl: detected.canonicalUrl });
 
     if (raced) {
       return raced;
@@ -73,7 +73,7 @@ export async function saveLink({
   }
 
   const crawl = await crawlDetectedLink(detected);
-  recordCost({
+  await recordCost({
     db,
     recipeId,
     provider: "crawler",
@@ -96,13 +96,13 @@ export async function saveLink({
         model: geminiModel,
         youtubeUrl: detected.canonicalUrl,
       });
-      recordUsage({ db, recipeId, origin: "video_understanding", usage: video.usage });
+      await recordUsage({ db, recipeId, origin: "video_understanding", usage: video.usage });
       chosen = video.recipe ?? chosen;
       videoFailed = video.recipe === null;
     } catch (error) {
       // Keep the link even when the model request fails.
       console.error(error instanceof Error ? error.message : "Error");
-      recordCost({
+      await recordCost({
         db,
         recipeId,
         provider: "google",
@@ -135,8 +135,8 @@ export async function saveLink({
   }
 
   const finished = finishDraft({ draft, crawl, recipe: chosen, videoFailed });
-  updateRecipeContent({ db, recipe: finished });
-  const saved = findRecipe({ db, householdId, recipeId });
+  await updateRecipeContent({ db, recipe: finished });
+  const saved = await findRecipe({ db, householdId, recipeId });
 
   if (!saved) {
     throw new Error("The saved video could not be reloaded. Refresh the kitchen.");
@@ -184,7 +184,7 @@ async function fillTranslations({
   model,
   ingredients,
 }: {
-  db: Database;
+  db: Db;
   recipeId: string;
   apiKey: string;
   model: string;
@@ -196,7 +196,7 @@ async function fillTranslations({
       model,
       names: ingredients.map((ingredient) => ingredient.name),
     });
-    recordUsage({ db, recipeId, origin: "ingredient_translation", usage: translated.usage });
+    await recordUsage({ db, recipeId, origin: "ingredient_translation", usage: translated.usage });
 
     if (translated.names.length !== ingredients.length) {
       return ingredients;
@@ -218,7 +218,7 @@ async function fillTranslations({
   } catch (error) {
     // The recipe text is already usable. Missing translations fall back to the source name.
     console.error(error instanceof Error ? error.message : "Error");
-    recordCost({
+    await recordCost({
       db,
       recipeId,
       provider: "google",
@@ -300,18 +300,18 @@ function emptyDraft({
   };
 }
 
-function recordUsage({
+async function recordUsage({
   db,
   recipeId,
   origin,
   usage,
 }: {
-  db: Database;
+  db: Db;
   recipeId: string;
   origin: string;
   usage: ModelUsage;
-}): void {
-  recordCost({
+}): Promise<void> {
+  await recordCost({
     db,
     recipeId,
     provider: "google",
@@ -325,7 +325,7 @@ function recordUsage({
   });
 }
 
-function recordCost({
+async function recordCost({
   db,
   recipeId,
   provider,
@@ -337,7 +337,7 @@ function recordCost({
   durationMs,
   note,
 }: {
-  db: Database;
+  db: Db;
   recipeId: string;
   provider: string;
   model: string | null;
@@ -347,8 +347,8 @@ function recordCost({
   outputTokens: number | null;
   durationMs: number;
   note: string | null;
-}): void {
-  insertCost({
+}): Promise<void> {
+  await insertCost({
     db,
     cost: { recipeId, provider, model, origin, usd, inputTokens, outputTokens, durationMs, note },
   });

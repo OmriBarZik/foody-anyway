@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --hot src/main.ts",
-    "build": "bun build ./src/index.html --outdir=dist --sourcemap --target=browser --minify --define:process.env.NODE_ENV='\"production\"' --env='BUN_PUBLIC_*'",
-    "start": "NODE_ENV=production bun src/main.ts",
-    "test": "bun test",
-    "typecheck": "bun check",
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
     "lint-staged": "lint-staged",
     "prepare": "husky"
   },
@@ -17,24 +17,26 @@
     "husky": "^9.1.7",
     "i18next": "^26.7.1",
     "lint-staged": "^17.6.0",
+    "next": "^16.4.5",
+    "pg": "^8.23.1",
     "react": "^19",
     "react-dom": "^19",
     "react-i18next": "^17.1.11"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
-      "bun fmt --staged",
-      "bun lint --staged --fix",
-      "bun check"
+      "bun fmt --staged"
     ]
   },
   "devDependencies": {
-    "@types/bun": "latest",
+    "@electric-sql/pglite": "^0.5.15",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "bun-lightningcss": "^0.2.0"
+    "typescript": "^5",
+    "vitest": "^5.1.0"
   },
   "peerDependencies": {
-    "typescript": "^7"
+    "typescript": "^5"
   }
 }

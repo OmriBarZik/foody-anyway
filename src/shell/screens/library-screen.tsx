@@ -57,7 +57,7 @@ export function LibraryScreen({
             value={url}
             onChange={(event) => setUrl(event.target.value)}
           />
-          <button className={styles.chiliButton} type="submit" disabled={saving}>
+          <button className={styles.pineButton} type="submit" disabled={saving}>
             {saving ? t("library.saving") : t("library.save")}
           </button>
         </div>
@@ -77,12 +77,16 @@ export function LibraryScreen({
               aria-current={recipe.id === selectedId ? "true" : undefined}
               onClick={() => onOpen(recipe.id)}
             >
-              {recipe.dishImageUrl || recipe.thumbnailUrl ? (
-                <img className={styles.thumb} src={recipe.dishImageUrl ?? recipe.thumbnailUrl ?? ""} alt="" />
-              ) : (
-                <span className={styles.thumb} />
-              )}
-              <span className={styles.cardTitle}>{recipe.title ?? t(`platforms.${recipe.platform}`)}</span>
+              <span className={styles.thumbWrap}>
+                {recipe.dishImageUrl || recipe.thumbnailUrl ? (
+                  <img className={styles.thumb} src={recipe.dishImageUrl ?? recipe.thumbnailUrl ?? ""} alt="" />
+                ) : (
+                  <span className={styles.thumb} />
+                )}
+                <span className={styles.cardScrim}>
+                  <span className={styles.cardTitle}>{recipe.title ?? t(`platforms.${recipe.platform}`)}</span>
+                </span>
+              </span>
               <span className={styles.byline}>{t("library.savedBy", { name: recipe.savedByName })}</span>
             </button>
           </li>

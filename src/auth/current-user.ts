@@ -1,4 +1,4 @@
-import type { Database } from "bun:sqlite";
+import type { Db } from "../db/db.types";
 
 import { createHouseholdForUser, findHouseholdForUser } from "../db/households";
 import type { CurrentUser } from "./auth.types";
@@ -11,7 +11,7 @@ export async function currentUser({
   request,
 }: {
   auth: FoodyAuth;
-  db: Database;
+  db: Db;
   request: Request;
 }): Promise<CurrentUser | null> {
   const session = await auth.api.getSession({ headers: request.headers });
@@ -20,14 +20,14 @@ export async function currentUser({
     return null;
   }
 
-  const existing = findHouseholdForUser({ db, userId: session.user.id });
+  const existing = await findHouseholdForUser({ db, userId: session.user.id });
 
   if (existing) {
     return { user: session.user, household: existing };
   }
 
   const name = session.user.name.trim() || "Kitchen";
-  const household = createHouseholdForUser({ db, userId: session.user.id, name });
+  const household = await createHouseholdForUser({ db, userId: session.user.id, name });
 
   return { user: session.user, household };
 }

@@ -1,4 +1,4 @@
-import type { Database } from "bun:sqlite";
+import type { Db } from "../db/db.types";
 
 import type { CurrentUser } from "../auth/auth.types";
 import { currentUser } from "../auth/current-user";
@@ -12,7 +12,7 @@ export async function requireUser({
   request,
 }: {
   auth: FoodyAuth;
-  db: Database;
+  db: Db;
   request: Request;
 }): Promise<CurrentUser | Response> {
   const found = await currentUser({ auth, db, request });

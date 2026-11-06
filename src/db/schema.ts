@@ -1,129 +1,160 @@
 /** Kitchen tables, plus the Better Auth tables generated for this config. */
 export const SCHEMA = `
 CREATE TABLE IF NOT EXISTS "user" (
-  "id" text not null primary key,
+  "id" text primary key,
   "name" text not null,
   "email" text not null unique,
-  "emailVerified" integer not null,
+  "emailVerified" boolean not null,
   "image" text,
-  "createdAt" date not null,
-  "updatedAt" date not null,
+  "createdAt" timestamptz not null,
+  "updatedAt" timestamptz not null,
   "locale" text,
   "measurement" text,
-  "isAdmin" integer
+  "isAdmin" boolean not null default false
 );
 
 CREATE TABLE IF NOT EXISTS "session" (
-  "id" text not null primary key,
-  "expiresAt" date not null,
+  "id" text primary key,
+  "expiresAt" timestamptz not null,
   "token" text not null unique,
-  "createdAt" date not null,
-  "updatedAt" date not null,
+  "createdAt" timestamptz not null,
+  "updatedAt" timestamptz not null,
   "ipAddress" text,
   "userAgent" text,
   "userId" text not null references "user" ("id") on delete cascade
 );
 
 CREATE TABLE IF NOT EXISTS "account" (
-  "id" text not null primary key,
+  "id" text primary key,
   "accountId" text not null,
   "providerId" text not null,
   "userId" text not null references "user" ("id") on delete cascade,
   "accessToken" text,
   "refreshToken" text,
   "idToken" text,
-  "accessTokenExpiresAt" date,
-  "refreshTokenExpiresAt" date,
+  "accessTokenExpiresAt" timestamptz,
+  "refreshTokenExpiresAt" timestamptz,
   "scope" text,
   "password" text,
-  "createdAt" date not null,
-  "updatedAt" date not null
+  "createdAt" timestamptz not null,
+  "updatedAt" timestamptz not null
 );
 
 CREATE TABLE IF NOT EXISTS "verification" (
-  "id" text not null primary key,
+  "id" text primary key,
   "identifier" text not null,
   "value" text not null,
-  "expiresAt" date not null,
-  "createdAt" date not null,
-  "updatedAt" date not null
+  "expiresAt" timestamptz not null,
+  "createdAt" timestamptz not null,
+  "updatedAt" timestamptz not null
 );
 
 CREATE INDEX IF NOT EXISTS "session_userId_idx" ON "session" ("userId");
 CREATE INDEX IF NOT EXISTS "account_userId_idx" ON "account" ("userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "account_provider_idx" ON "account" ("providerId", "accountId");
 CREATE INDEX IF NOT EXISTS "verification_identifier_idx" ON "verification" ("identifier");
 
 CREATE TABLE IF NOT EXISTS households (
-  id TEXT PRIMARY KEY,
-  name TEXT NOT NULL,
-  created_at TEXT NOT NULL
+  id text primary key,
+  name text not null,
+  created_at text not null
 );
 
 CREATE TABLE IF NOT EXISTS memberships (
-  user_id TEXT NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
-  household_id TEXT NOT NULL REFERENCES households (id) ON DELETE CASCADE,
-  role TEXT NOT NULL CHECK (role IN ('owner', 'member')),
-  created_at TEXT NOT NULL,
-  PRIMARY KEY (user_id, household_id)
+  user_id text not null references "user" (id) on delete cascade,
+  household_id text not null references households (id) on delete cascade,
+  role text not null check (role in ('owner', 'member')),
+  created_at text not null,
+  primary key (user_id, household_id)
 );
 
 CREATE TABLE IF NOT EXISTS invites (
-  id TEXT PRIMARY KEY,
-  household_id TEXT NOT NULL REFERENCES households (id) ON DELETE CASCADE,
-  token TEXT NOT NULL UNIQUE,
-  created_by_user_id TEXT NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
-  created_at TEXT NOT NULL,
-  expires_at TEXT NOT NULL
+  id text primary key,
+  household_id text not null references households (id) on delete cascade,
+  token text not null unique,
+  created_by_user_id text not null references "user" (id) on delete cascade,
+  created_at text not null,
+  expires_at text not null
 );
 
 CREATE TABLE IF NOT EXISTS recipes (
-  id TEXT PRIMARY KEY,
-  household_id TEXT NOT NULL REFERENCES households (id) ON DELETE CASCADE,
-  saved_by_user_id TEXT NOT NULL REFERENCES "user" (id) ON DELETE CASCADE,
-  source_url TEXT NOT NULL,
-  platform TEXT NOT NULL CHECK (platform IN ('youtube', 'tiktok', 'instagram', 'pinterest')),
-  thumbnail_url TEXT,
-  dish_image_url TEXT,
-  title TEXT,
-  servings TEXT,
-  cook_time TEXT,
-  ingredients_json TEXT NOT NULL,
-  steps_json TEXT NOT NULL,
-  source_language TEXT,
-  source_measurement TEXT,
-  extraction_status TEXT NOT NULL CHECK (extraction_status IN ('pending', 'ready', 'needs_review', 'failed')),
-  extraction_note TEXT,
-  created_at TEXT NOT NULL
+  id text primary key,
+  household_id text not null references households (id) on delete cascade,
+  saved_by_user_id text not null references "user" (id) on delete cascade,
+  source_url text not null,
+  platform text not null check (platform in ('youtube', 'tiktok', 'instagram', 'pinterest')),
+  thumbnail_url text,
+  dish_image_url text,
+  title text,
+  servings text,
+  cook_time text,
+  ingredients_json text not null,
+  steps_json text not null,
+  source_language text,
+  source_measurement text,
+  extraction_status text not null check (extraction_status in ('pending', 'ready', 'needs_review', 'failed')),
+  extraction_note text,
+  created_at text not null
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS recipes_household_url ON recipes (household_id, source_url);
 
 CREATE TABLE IF NOT EXISTS extraction_costs (
-  id TEXT PRIMARY KEY,
-  recipe_id TEXT NOT NULL REFERENCES recipes (id) ON DELETE CASCADE,
-  provider TEXT NOT NULL,
-  model TEXT,
-  origin TEXT NOT NULL,
-  usd REAL NOT NULL,
-  input_tokens INTEGER,
-  output_tokens INTEGER,
-  duration_ms INTEGER NOT NULL,
-  note TEXT,
-  created_at TEXT NOT NULL
+  id text primary key,
+  recipe_id text not null references recipes (id) on delete cascade,
+  provider text not null,
+  model text,
+  origin text not null,
+  usd double precision not null,
+  input_tokens integer,
+  output_tokens integer,
+  duration_ms integer not null,
+  note text,
+  created_at text not null
 );
 
 CREATE INDEX IF NOT EXISTS extraction_costs_recipe ON extraction_costs (recipe_id);
 
 CREATE TABLE IF NOT EXISTS stock_items (
-  id TEXT PRIMARY KEY,
-  household_id TEXT NOT NULL REFERENCES households (id) ON DELETE CASCADE,
-  location TEXT NOT NULL CHECK (location IN ('fridge', 'freezer', 'pantry', 'spices')),
-  name TEXT NOT NULL,
-  amount REAL,
-  unit TEXT,
-  present INTEGER CHECK (present IS NULL OR present IN (0, 1)),
-  updated_at TEXT NOT NULL
+  id text primary key,
+  household_id text not null references households (id) on delete cascade,
+  location text not null check (location in ('fridge', 'freezer', 'pantry', 'spices')),
+  name text not null,
+  amount double precision,
+  unit text,
+  present integer check (present is null or present in (0, 1)),
+  updated_at text not null
 );
 
 CREATE INDEX IF NOT EXISTS stock_items_household ON stock_items (household_id, location, name);
+
+CREATE TABLE IF NOT EXISTS dietary_profiles (
+  user_id text primary key references "user" (id) on delete cascade,
+  allergies_json text not null,
+  diet text check (diet is null or diet in ('omnivore', 'vegetarian', 'vegan', 'pescatarian', 'kosher', 'halal')),
+  dislikes_json text not null,
+  max_minutes integer,
+  budget text check (budget is null or budget in ('low', 'medium', 'high')),
+  interests_json text not null,
+  updated_at text not null
+);
+
+CREATE TABLE IF NOT EXISTS stock_passes (
+  household_id text not null references households (id) on delete cascade,
+  staple_en text not null,
+  decision text not null check (decision in ('have', 'skip')),
+  primary key (household_id, staple_en)
+);
+
+CREATE TABLE IF NOT EXISTS shopping_items (
+  id text primary key,
+  household_id text not null references households (id) on delete cascade,
+  name text not null,
+  amount double precision,
+  unit text,
+  recipe_id text references recipes (id) on delete set null,
+  created_at text not null
+);
+
+CREATE INDEX IF NOT EXISTS shopping_items_household ON shopping_items (household_id, created_at);
 `;

@@ -1,7 +1,6 @@
-import type { Database } from "bun:sqlite";
 import type { ExtractionStatus, Ingredient, RecipeStep, RecipeView, VideoPlatform } from "../domain/domain.types";
+import type { Db, RecipeListRow, RecipeWrite } from "./db.types";
 import { isRecord } from "../shared/is-record";
-import type { RecipeListRow, RecipeWrite } from "./db.types";
 
 const RECIPE_SELECT = `
   SELECT recipes.*, "user".name AS saved_by_name
@@ -10,26 +9,26 @@ const RECIPE_SELECT = `
 `;
 
 /** Recipes in one kitchen, newest first. */
-export function listRecipes({ db, householdId }: { db: Database; householdId: string }): RecipeView[] {
-  const rows = db
-    .query<RecipeListRow, [string]>(`${RECIPE_SELECT} WHERE recipes.household_id = ? ORDER BY recipes.created_at DESC`)
+export async function listRecipes({ db, householdId }: { db: Db; householdId: string }): Promise<RecipeView[]> {
+  const rows = await db
+    .query<RecipeListRow>(`${RECIPE_SELECT} WHERE recipes.household_id = ? ORDER BY recipes.created_at DESC`)
     .all(householdId);
 
   return rows.map((row) => toRecipeView(row));
 }
 
 /** One recipe, only if it belongs to this kitchen. */
-export function findRecipe({
+export async function findRecipe({
   db,
   householdId,
   recipeId,
 }: {
-  db: Database;
+  db: Db;
   householdId: string;
   recipeId: string;
-}): RecipeView | null {
-  const row = db
-    .query<RecipeListRow, [string, string]>(`${RECIPE_SELECT} WHERE recipes.household_id = ? AND recipes.id = ?`)
+}): Promise<RecipeView | null> {
+  const row = await db
+    .query<RecipeListRow>(`${RECIPE_SELECT} WHERE recipes.household_id = ? AND recipes.id = ?`)
     .get(householdId, recipeId);
 
   if (!row) {
@@ -40,19 +39,17 @@ export function findRecipe({
 }
 
 /** An earlier save of the same link in this kitchen. */
-export function findRecipeBySource({
+export async function findRecipeBySource({
   db,
   householdId,
   sourceUrl,
 }: {
-  db: Database;
+  db: Db;
   householdId: string;
   sourceUrl: string;
-}): RecipeView | null {
-  const row = db
-    .query<RecipeListRow, [string, string]>(
-      `${RECIPE_SELECT} WHERE recipes.household_id = ? AND recipes.source_url = ?`,
-    )
+}): Promise<RecipeView | null> {
+  const row = await db
+    .query<RecipeListRow>(`${RECIPE_SELECT} WHERE recipes.household_id = ? AND recipes.source_url = ?`)
     .get(householdId, sourceUrl);
 
   if (!row) {
@@ -63,38 +60,41 @@ export function findRecipeBySource({
 }
 
 /** Insert a recipe that extraction will fill in. */
-export function insertRecipe({ db, recipe }: { db: Database; recipe: RecipeWrite }): void {
-  db.query(
-    `INSERT INTO recipes (
+export async function insertRecipe({ db, recipe }: { db: Db; recipe: RecipeWrite }): Promise<void> {
+  await db
+    .query(
+      `INSERT INTO recipes (
       id, household_id, saved_by_user_id, source_url, platform, thumbnail_url, dish_image_url,
       title, servings, cook_time, ingredients_json, steps_json, source_language, source_measurement,
       extraction_status, extraction_note, created_at
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    recipe.id,
-    recipe.householdId,
-    recipe.savedByUserId,
-    recipe.sourceUrl,
-    recipe.platform,
-    recipe.thumbnailUrl,
-    recipe.dishImageUrl,
-    recipe.title,
-    recipe.servings,
-    recipe.cookTime,
-    JSON.stringify(recipe.ingredients),
-    JSON.stringify(recipe.steps),
-    recipe.sourceLanguage,
-    recipe.sourceMeasurement,
-    recipe.extractionStatus,
-    recipe.extractionNote,
-    new Date().toISOString(),
-  );
+    )
+    .run(
+      recipe.id,
+      recipe.householdId,
+      recipe.savedByUserId,
+      recipe.sourceUrl,
+      recipe.platform,
+      recipe.thumbnailUrl,
+      recipe.dishImageUrl,
+      recipe.title,
+      recipe.servings,
+      recipe.cookTime,
+      JSON.stringify(recipe.ingredients),
+      JSON.stringify(recipe.steps),
+      recipe.sourceLanguage,
+      recipe.sourceMeasurement,
+      recipe.extractionStatus,
+      recipe.extractionNote,
+      new Date().toISOString(),
+    );
 }
 
 /** Replace the parsed fields after a crawl or a model call. */
-export function updateRecipeContent({ db, recipe }: { db: Database; recipe: RecipeWrite }): void {
-  db.query(
-    `UPDATE recipes SET
+export async function updateRecipeContent({ db, recipe }: { db: Db; recipe: RecipeWrite }): Promise<void> {
+  await db
+    .query(
+      `UPDATE recipes SET
       thumbnail_url = ?,
       dish_image_url = ?,
       title = ?,
@@ -107,21 +107,22 @@ export function updateRecipeContent({ db, recipe }: { db: Database; recipe: Reci
       extraction_status = ?,
       extraction_note = ?
     WHERE id = ? AND household_id = ?`,
-  ).run(
-    recipe.thumbnailUrl,
-    recipe.dishImageUrl,
-    recipe.title,
-    recipe.servings,
-    recipe.cookTime,
-    JSON.stringify(recipe.ingredients),
-    JSON.stringify(recipe.steps),
-    recipe.sourceLanguage,
-    recipe.sourceMeasurement,
-    recipe.extractionStatus,
-    recipe.extractionNote,
-    recipe.id,
-    recipe.householdId,
-  );
+    )
+    .run(
+      recipe.thumbnailUrl,
+      recipe.dishImageUrl,
+      recipe.title,
+      recipe.servings,
+      recipe.cookTime,
+      JSON.stringify(recipe.ingredients),
+      JSON.stringify(recipe.steps),
+      recipe.sourceLanguage,
+      recipe.sourceMeasurement,
+      recipe.extractionStatus,
+      recipe.extractionNote,
+      recipe.id,
+      recipe.householdId,
+    );
 }
 
 /** Map a stored row into the shape the app renders. */

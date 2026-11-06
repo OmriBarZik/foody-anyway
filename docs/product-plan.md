@@ -2,11 +2,11 @@
 
 Shared kitchen app for a household. People save cooking videos, keep one kitchen inventory, and later get told what they can cook from recipes they already saved.
 
-The library and kitchen list mode are in the app. Guess mode, shopping, and suggestions come after.
+The library, kitchen list mode, guess mode, shopping, suggestions, the dietary profile, and the admin cost screen are in the app. Expiry dates stay later.
 
 ## Progress
 
-The library slice is in the app. Kitchen stock list mode is in the app. Guess mode, shopping, suggestions, the dietary profile, and the admin cost screen are not.
+The library slice is in the app. Kitchen stock, guess mode, the shopping list, suggestions, the dietary profile, and the admin cost screen are in the app. Expiry dates are not.
 
 ### Library
 
@@ -23,15 +23,15 @@ The library slice is in the app. Kitchen stock list mode is in the app. Guess mo
 
 - [x] Shared stock for fridge, freezer, pantry, and spices. Spices are present or absent. Everything else has an amount.
 - [x] List mode: add, edit, and remove stock by hand.
-- [ ] Guess mode: swipe proposed ingredients into or out of the kitchen.
+- [x] Guess mode: swipe proposed ingredients into or out of the kitchen.
 - [ ] Expiry dates stay out until a later slice.
 
 ### Later
 
-- [ ] Shopping list, including the prompt that adds missing ingredients for a saved recipe.
-- [ ] Suggestion mix of saved recipes the kitchen can make, filtered by the current user's profile.
-- [ ] Dietary profile editor (allergies, diet, dislikes, time, budget, interests).
-- [ ] Admin cost dashboard. Cost rows are already written.
+- [x] Shopping list, including the prompt that adds missing ingredients for a saved recipe.
+- [x] Suggestion mix of saved recipes the kitchen can make, filtered by the current user's profile.
+- [x] Dietary profile editor (allergies, diet, dislikes, time, budget, interests).
+- [x] Admin cost dashboard. Cost rows are already written.
 
 ## Decisions
 
@@ -103,7 +103,7 @@ The library slice:
 - Record extraction cost for each run.
 - UI strings in English and Hebrew, with direction following the language.
 
-Explicitly later: kitchen guess mode, shopping list, suggestion mix, dietary profile editor, admin cost dashboard UI. Kitchen list mode is already in the app.
+Explicitly later: expiry dates. Kitchen list mode, guess mode, the shopping list, suggestions, the dietary profile, and the admin cost screen are in the app.
 
 ## Data the first slice needs
 
@@ -114,6 +114,9 @@ Explicitly later: kitchen guess mode, shopping list, suggestion mix, dietary pro
 - **Recipe** — household, who saved it, source URL, platform, thumbnail URL, dish image URL, title, servings, time, ingredients in the source language and in translation, steps in the source language, source measurement system, source language, extraction status (`pending`, `ready`, `needs_review`, `failed`).
 - **Extraction cost** — recipe, provider, model, origin, USD, tokens, time.
 - **Stock item** — household, location (`fridge`, `freezer`, `pantry`, `spices`), name, amount and unit, or present/absent for spices.
+- **Dietary profile** — user, allergies, diet, dislikes, max minutes, budget, interests.
+- **Stock pass** — household and the guess-deck staple already swiped.
+- **Shopping item** — household, name, optional amount and unit, optional recipe the line came from.
 
 ## Stack notes for the build
 

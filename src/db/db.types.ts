@@ -1,4 +1,29 @@
+import type { Pool } from "pg";
+
 import type { Ingredient, RecipeStep, StockLocation } from "../domain/domain.types";
+
+/** Changes reported by an insert, update, or delete. */
+export type DbRunResult = {
+  changes: number;
+};
+
+/** A prepared kitchen query. Placeholders in the SQL are `?`. */
+export type DbStatement<Row> = {
+  get(...params: unknown[]): Promise<Row | null>;
+  all(...params: unknown[]): Promise<Row[]>;
+  run(...params: unknown[]): Promise<DbRunResult>;
+};
+
+/** Postgres access for the kitchen tables. */
+export type Db = {
+  query<Row>(text: string): DbStatement<Row>;
+  transaction<Result>(work: (db: Db) => Promise<Result>): Promise<Result>;
+};
+
+/** The hosted database, shared with Better Auth. */
+export type ConnectedDb = Db & {
+  pool: Pool;
+};
 
 /** A row in households. */
 export type HouseholdRow = {
@@ -97,6 +122,11 @@ export type CostWrite = {
   outputTokens: number | null;
   durationMs: number;
   note: string | null;
+};
+
+/** A link someone can open to join this kitchen. */
+export type InviteLink = {
+  url: string;
 };
 
 /** Why an invite could not move someone into a kitchen. */

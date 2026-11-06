@@ -6,14 +6,20 @@
   --chili: #d63a2f;
   --chili-deep: #b12e25;
   --yolk: #e6b325;
-  --mist: #e4efe8;
-  --paper: #f6f7f4;
-  --line: #c5d5cb;
+  --mist: #e7f0e4;
+  --paper: #f6f3ec;
+  --line: color-mix(in srgb, var(--ink) 12%, transparent);
+  --serif: Newsreader, "Frank Ruhl Libre", "Times New Roman", serif;
   font-family: Rubik, "Avenir Next", "Segoe UI", sans-serif;
   font-size: 16px;
   line-height: 1.5;
   color: var(--ink);
   background: var(--paper);
+}
+
+html,
+body {
+  height: 100%;
 }
 
 body {
@@ -26,8 +32,8 @@ body {
 }
 
 :focus-visible {
-  outline: 3px solid var(--yolk);
-  outline-offset: 3px;
+  outline: 2px solid var(--yolk);
+  outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {

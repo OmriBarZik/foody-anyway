@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { AppRoute, AuthError, RouteState } from "./shell.types";
+import type { AppRoute, AuthError, RouteState, SectionName } from "./shell.types";
 
 /** Keep the screen in sync with the path, without a router library. */
 export function useRoute(): RouteState {
@@ -24,6 +24,16 @@ export function useRoute(): RouteState {
   return { route: parseRoute(path), go };
 }
 
+const SECTION_PATHS: Record<string, SectionName> = {
+  "/stock": "stock",
+  "/guess": "guess",
+  "/shop": "shop",
+  "/ideas": "ideas",
+  "/profile": "profile",
+  "/settings": "settings",
+  "/costs": "costs",
+};
+
 function parseRoute(path: string): AppRoute {
   const url = new URL(path, window.location.origin);
   const authError = readAuthError(url.searchParams.get("auth"));
@@ -38,8 +48,10 @@ function parseRoute(path: string): AppRoute {
     return { name: "recipe", recipeId: decodeURIComponent(recipe[1]), authError };
   }
 
-  if (url.pathname === "/stock") {
-    return { name: "stock", authError };
+  const section = SECTION_PATHS[url.pathname];
+
+  if (section) {
+    return { name: section, authError };
   }
 
   return { name: "library", authError };

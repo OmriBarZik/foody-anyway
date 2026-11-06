@@ -1,17 +1,9 @@
-import { Database } from "bun:sqlite";
-import { mkdirSync } from "node:fs";
-import { dirname } from "node:path";
-
 import { readConfig } from "../config/read-config";
+import { openDb } from "../db/open-db";
 import { createFoodyAuth } from "./create-foody-auth";
 
 const config = readConfig();
+const db = await openDb(config.databaseUrl);
 
-if (config.databasePath !== ":memory:") {
-  mkdirSync(dirname(config.databasePath), { recursive: true });
-}
-
-const db = new Database(config.databasePath);
-
-/** Loaded by `bun x auth@latest migrate --config src/auth/cli.ts`. */
+/** Loaded by the Better Auth CLI: `npx auth@latest migrate --config src/auth/cli.ts`. */
 export const auth = createFoodyAuth({ db, config });

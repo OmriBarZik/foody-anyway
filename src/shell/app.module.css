@@ -1,36 +1,96 @@
 .page {
-  max-width: 1120px;
+  box-sizing: border-box;
+  max-width: 440px;
   margin-inline: auto;
-  padding: 20px 20px calc(28px + env(safe-area-inset-bottom));
-  min-height: 100vh;
+  padding: 28px 20px calc(32px + env(safe-area-inset-bottom));
+  min-height: 100dvh;
+}
+
+.signIn {
+  width: 100%;
+  padding-top: 12vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.shell {
+  box-sizing: border-box;
+  height: 100dvh;
+  display: grid;
+  grid-template-areas:
+    "bar"
+    "stage"
+    "nav";
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.rail {
+  display: contents;
+}
+
+.stage {
+  grid-area: stage;
+  min-height: 0;
+  overflow: auto;
+  padding: 8px 20px 28px;
+}
+
+.stageIn {
+  min-height: 100%;
 }
 
 .top {
+  grid-area: bar;
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  align-items: flex-end;
-  gap: 16px 24px;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 14px 16px 8px;
 }
 
 .brand {
   margin: 0;
-  font-family: "Frank Ruhl Libre", "Times New Roman", serif;
-  font-size: clamp(2.5rem, 6vw, 4rem);
-  font-weight: 700;
+  font-family: var(--serif);
+  font-size: clamp(2.75rem, 8vw, 3.5rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
   line-height: 0.95;
 }
 
+.top .brand {
+  font-size: 1.75rem;
+  font-weight: 400;
+}
+
 .brandRule {
-  width: 72px;
-  height: 6px;
-  margin-top: 10px;
+  width: 40px;
+  height: 3px;
+  margin-top: 8px;
   border: 0;
+  border-radius: 999px;
   background: var(--yolk);
 }
 
 .household {
   margin: 8px 0 0;
+}
+
+.person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.personName,
+.personMail {
+  margin: 0;
+}
+
+.personName {
+  font-weight: 500;
 }
 
 .controls {
@@ -55,12 +115,12 @@
 
 .choice[aria-pressed="true"] {
   box-shadow: inset 0 -3px 0 var(--yolk);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .textButton {
   color: var(--pine);
-  font-weight: 600;
+  font-weight: 500;
   padding: 0;
 }
 
@@ -72,8 +132,30 @@
 }
 
 .lead {
-  max-width: 38rem;
-  font-size: 1.2rem;
+  max-width: 18rem;
+  margin-top: 3.5rem;
+  font-size: 1.25rem;
+  line-height: 1.55;
+}
+
+.signIn .brand {
+  font-size: clamp(2.75rem, 8vw, 3.5rem);
+}
+
+.signIn .brandRule {
+  width: 56px;
+  height: 4px;
+  margin-top: 12px;
+}
+
+.signIn .pineButton {
+  width: 100%;
+  margin-top: 4rem;
+}
+
+.signIn .controls {
+  margin-top: auto;
+  padding-top: 4rem;
 }
 
 .pineButton,
@@ -83,16 +165,26 @@
   justify-content: center;
   border: 0;
   border-radius: 999px;
+  min-height: 44px;
   padding: 12px 18px;
   color: white;
   font: inherit;
-  font-weight: 600;
+  gap: 10px;
+  font-weight: 500;
   text-decoration: none;
   cursor: pointer;
 }
 
 .pineButton {
   background: var(--pine);
+}
+
+.googleMark {
+  width: 18px;
+  height: 18px;
+  flex: none;
+  background: white;
+  border-radius: 999px;
 }
 
 .pineButton:hover {
@@ -115,7 +207,6 @@
 
 .workspace {
   display: block;
-  margin-top: 28px;
 }
 
 .detailColumn {
@@ -131,13 +222,18 @@
 }
 
 .paste {
-  margin: 28px 0 8px;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: 0 0 8px;
+  padding-bottom: 12px;
+  background: var(--paper);
 }
 
 .pasteLabel {
   display: block;
-  font-size: 1.35rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 400;
   margin-bottom: 8px;
 }
 
@@ -150,39 +246,39 @@
 
 .pasteField {
   flex: 1 1 220px;
-  border: 0;
-  border-bottom: 2px solid var(--ink);
-  border-radius: 0;
+  border: 1px solid var(--line);
+  border-radius: 999px;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 1.125rem;
-  padding: 8px 0;
+  font-size: 1rem;
+  padding: 0.75rem 1rem;
 }
 
 .recipeList {
   list-style: none;
-  margin: 28px 0 0;
+  margin: 12px 0 0;
   padding: 0;
   display: grid;
-  gap: 28px;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
 }
 
 .recipeButton {
   display: block;
   width: 100%;
-  padding: 0 0 8px;
-  border: 0;
-  border-inline-start: 4px solid transparent;
+  padding: 0 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
   background: transparent;
   color: inherit;
   text-align: start;
   cursor: pointer;
+  overflow: hidden;
 }
 
 .recipeButton[aria-current="true"] {
-  border-inline-start-color: var(--yolk);
-  padding-inline-start: 12px;
+  border-color: var(--pine);
 }
 
 .thumb,
@@ -194,34 +290,52 @@
 }
 
 .thumb {
-  aspect-ratio: 16 / 10;
+  aspect-ratio: 16 / 9;
+}
+
+.thumbWrap {
+  position: relative;
+  display: block;
+}
+
+.cardScrim {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  padding: 14px 16px;
+  background: color-mix(in srgb, var(--ink) 55%, transparent);
 }
 
 .heroImage {
   aspect-ratio: 4 / 3;
+  border-radius: 16px;
 }
 
 .cardTitle,
-.recipeTitle {
-  font-family: "Frank Ruhl Libre", "Times New Roman", serif;
-  font-weight: 700;
+.recipeTitle,
+.sectionTitle,
+.guessName {
+  font-family: var(--serif);
+  font-weight: 500;
   line-height: 1.1;
 }
 
 .cardTitle {
-  margin: 10px 0 4px;
-  font-size: 1.6rem;
+  margin: 0;
+  color: var(--paper);
+  font-size: 1.65rem;
 }
 
 .recipeTitle {
-  margin: 12px 0;
-  font-size: clamp(2rem, 4vw, 3.25rem);
+  margin: 16px 0 8px;
+  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  letter-spacing: -0.02em;
 }
 
 .meta {
   margin: 0;
   color: var(--pine);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .byline,
@@ -229,10 +343,12 @@
   margin: 4px 0 0;
 }
 
+.recipeButton .byline {
+  margin: 8px 16px 0;
+}
+
 .notice {
-  background: var(--mist);
-  padding: 12px 14px;
-  margin: 12px 0;
+  margin: 0;
 }
 
 .alert {
@@ -259,7 +375,7 @@
 }
 
 .amount {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .steps {
@@ -276,14 +392,15 @@
 }
 
 .sectionTitle {
-  margin: 28px 0 8px;
-  font-size: 1.25rem;
+  margin: 20px 0 4px;
+  font-size: 1.5rem;
+  font-weight: 400;
 }
 
 .videoLink,
 .back {
   color: var(--pine);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .back {
@@ -298,9 +415,34 @@
 }
 
 .nav {
+  grid-area: nav;
   display: flex;
+  flex-wrap: nowrap;
   gap: 8px;
-  margin: 8px 0 20px;
+  margin: 0;
+  overflow-x: auto;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+}
+
+.tab {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  min-height: 40px;
+  padding: 6px 12px;
+  font: inherit;
+  font-size: 0.95rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.tab[aria-current="page"] {
+  background: var(--pine);
+  border-color: var(--pine);
+  color: var(--paper);
 }
 
 .stock {
@@ -342,18 +484,237 @@
 .amountField,
 .unitField {
   width: 6.5rem;
-  border: 2px solid var(--line);
-  background: white;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
   color: var(--ink);
-  padding: 0.7rem 0.8rem;
+  padding: 0.7rem 0.9rem;
   font: inherit;
 }
 
+.stack,
+.stock {
+  max-width: 760px;
+}
+
+.stack {
+  display: grid;
+  gap: 18px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.guessStage {
+  position: relative;
+  min-height: 100%;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 16px;
+  padding-block: 12px 28px;
+}
+
+.guessStage:focus-visible {
+  outline: 3px solid var(--yolk);
+  outline-offset: 6px;
+}
+
+.guessLead {
+  max-width: 36rem;
+  margin: 0;
+  text-align: center;
+}
+
+.live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.deck {
+  position: relative;
+  width: min(100%, 440px);
+  min-height: min(420px, 68dvh);
+  display: grid;
+  place-items: center;
+}
+
+.deckBack {
+  display: none;
+}
+
+.guessCard {
+  position: relative;
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: transparent;
+  padding: 40px 24px 24px;
+  min-height: min(380px, 62dvh);
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 12px;
+  text-align: center;
+  touch-action: none;
+  user-select: none;
+  transition: transform 340ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: grab;
+}
+
+.guessCard[data-dragging="true"] {
+  transition: none;
+  cursor: grabbing;
+}
+
+.guessCard[data-flight="have"] {
+  transform: translateX(120%) rotate(12deg);
+}
+
+.guessCard[data-flight="skip"] {
+  transform: translateX(-120%) rotate(-12deg);
+}
+
+.guessCard[data-lean="have"] {
+  border-color: var(--pine);
+}
+
+.guessCard[data-lean="skip"] {
+  border-color: var(--chili);
+}
+
+.guessName {
+  margin: 0;
+  font-size: clamp(3rem, 12vw, 4.5rem);
+  letter-spacing: -0.03em;
+}
+
+.guessPlace {
+  margin: 0;
+  color: var(--pine);
+  font-weight: 500;
+}
+
+.guessActions {
+  display: flex;
+  direction: ltr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.option {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  border-radius: 999px;
+  min-height: 44px;
+  padding: 8px 14px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.option[aria-pressed="true"] {
+  background: var(--pine);
+  border-color: var(--pine);
+  color: var(--paper);
+}
+
+.wordList {
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+
+.chip {
+  border: 0;
+  border-radius: 999px;
+  background: var(--mist);
+  color: var(--ink);
+  font: inherit;
+  padding: 0.4rem 0.85rem;
+  cursor: pointer;
+}
+
+.ideaCard {
+  display: grid;
+  gap: 8px;
+  padding-block: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
 @media (min-width: 960px) {
+  .shell {
+    grid-template-areas: "rail stage";
+    grid-template-columns: 232px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+
+  .rail {
+    display: flex;
+    flex-direction: column;
+    grid-area: rail;
+    gap: 28px;
+    min-height: 0;
+    padding: 28px 18px;
+    border-inline-end: 1px solid var(--line);
+    overflow: auto;
+  }
+
+  .top {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0;
+  }
+
+  .nav {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 0;
+    border: 0;
+    overflow: visible;
+  }
+
+  .tab {
+    text-align: start;
+  }
+
+  .stage {
+    padding: 32px 40px 48px;
+  }
+
+  .stock {
+    max-width: none;
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+
   .workspace,
   .workspaceRecipe {
     display: grid;
-    grid-template-columns: 340px minmax(0, 1fr);
+    grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
     gap: 36px;
     align-items: start;
   }
@@ -362,5 +723,9 @@
   .detailColumn,
   .workspaceRecipe .listColumn {
     display: block;
+  }
+
+  .detailColumn article {
+    max-width: 46rem;
   }
 }

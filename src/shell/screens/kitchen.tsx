@@ -1,17 +1,14 @@
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
-import type { Locale, MeasurementSystem, RecipeView, UserView } from "../../domain/domain.types";
-import { ApiError, createInvite, fetchRecipe, fetchRecipes, saveRecipe, signOut, updateMe } from "../api";
+import type { RecipeView, UserView } from "../../domain/domain.types";
+import { ApiError, fetchRecipe, fetchRecipes, saveRecipe } from "../api";
 import styles from "../app.module.css";
-import { applyLocale } from "../i18n";
-import type { AppRoute, InviteButtonState } from "../shell.types";
+import type { AppRoute } from "../shell.types";
 import { InviteBanner } from "./invite-banner";
-import { LibraryScreen } from "./library-screen";
-import { RecipeScreen } from "./recipe-screen";
-import { StockScreen } from "./stock-screen";
+import { KitchenNav } from "./nav/kitchen-nav";
+import { KitchenPages } from "./nav/kitchen-pages";
 import { TopBar } from "./top-bar";
 
-/** The signed-in kitchen: paste a video, read it, invite someone. */
+/** The signed-in kitchen: paste a video, then read it. */
 export function Kitchen({
   user,
   route,
@@ -25,14 +22,11 @@ export function Kitchen({
   onUser: (user: UserView) => void;
   onRefresh: () => Promise<void>;
 }) {
-  const { t } = useTranslation();
   const [recipes, setRecipes] = useState<RecipeView[]>([]);
   const [saving, setSaving] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
-  const [inviteState, setInviteState] = useState<InviteButtonState>("idle");
   const [opened, setOpened] = useState<RecipeView | null>(null);
   const [missing, setMissing] = useState(false);
-  const [settingsFailed, setSettingsFailed] = useState(false);
   const selectedId = route.name === "recipe" ? route.recipeId : null;
   const listed = recipes.find((recipe) => recipe.id === selectedId) ?? null;
   const recipe = listed ?? (opened?.id === selectedId ? opened : null);
@@ -95,96 +89,42 @@ export function Kitchen({
     setSaving(false);
   }
 
-  async function onLocale(locale: Locale): Promise<void> {
-    const previous = user.locale;
-    setSettingsFailed(false);
-    await applyLocale(locale);
-
-    try {
-      onUser(await updateMe({ locale }));
-    } catch {
-      setSettingsFailed(true);
-      await applyLocale(previous);
-    }
-  }
-
-  async function onMeasurement(measurement: MeasurementSystem): Promise<void> {
-    setSettingsFailed(false);
-
-    try {
-      onUser(await updateMe({ measurement }));
-    } catch {
-      setSettingsFailed(true);
-    }
-  }
-
-  async function onInvite(): Promise<void> {
-    try {
-      const link = await createInvite();
-      await navigator.clipboard.writeText(link.url);
-      setInviteState("copied");
-    } catch {
-      setInviteState("failed");
-    }
-  }
-
-  async function onSignOut(): Promise<void> {
-    await signOut();
-    go("/");
-    await onRefresh();
-  }
-
   return (
-    <main className={styles.page}>
-      <TopBar
-        user={user}
-        inviteState={inviteState}
-        onLocale={(locale) => void onLocale(locale)}
-        onMeasurement={(measurement) => void onMeasurement(measurement)}
-        onInvite={() => void onInvite()}
-        onSignOut={() => void onSignOut()}
-      />
-      {settingsFailed ? <p className={styles.alert}>{t("settings.failed")}</p> : null}
-      <nav className={styles.nav}>
-        <button
-          type="button"
-          className={styles.choice}
-          aria-current={route.name === "stock" ? undefined : "page"}
-          onClick={() => go("/")}
-        >
-          {t("stock.videos")}
-        </button>
-        <button
-          type="button"
-          className={styles.choice}
-          aria-current={route.name === "stock" ? "page" : undefined}
-          onClick={() => go("/stock")}
-        >
-          {t("stock.nav")}
-        </button>
-      </nav>
-      {route.name === "invite" ? (
-        <InviteBanner token={route.token} onJoined={() => void onRefresh().then(() => go("/"))} />
-      ) : null}
-      {route.name === "stock" ? (
-        <StockScreen />
-      ) : (
-        <div className={route.name === "recipe" ? styles.workspaceRecipe : styles.workspace}>
-          <div className={styles.listColumn}>
-            <LibraryScreen
-              recipes={recipes}
-              saving={saving}
-              errorCode={errorCode}
-              selectedId={selectedId}
-              onOpen={(recipeId) => go(`/recipes/${recipeId}`)}
-              onSave={(url) => void onSave(url)}
-            />
-          </div>
-          <div className={styles.detailColumn}>
-            <RecipeScreen recipe={recipe} measurement={user.measurement} missing={missing} onBack={() => go("/")} />
-          </div>
+    <main className={styles.shell}>
+      <div className={styles.rail}>
+        <TopBar user={user} />
+        <KitchenNav user={user} route={route} go={go} />
+      </div>
+      <div className={styles.stage}>
+        {route.name === "invite" ? (
+          <InviteBanner token={route.token} onJoined={() => void onRefresh().then(() => go("/"))} />
+        ) : null}
+        <div key={stageName(route)} className={styles.stageIn}>
+          <KitchenPages
+            user={user}
+            route={route}
+            go={go}
+            recipes={recipes}
+            saving={saving}
+            errorCode={errorCode}
+            selectedId={selectedId}
+            recipe={recipe}
+            missing={missing}
+            onOpen={(recipeId) => go(`/recipes/${recipeId}`)}
+            onSave={(url) => void onSave(url)}
+            onUser={onUser}
+            onRefresh={onRefresh}
+          />
         </div>
-      )}
+      </div>
     </main>
   );
+}
+
+function stageName(route: AppRoute): string {
+  if (route.name === "library" || route.name === "recipe" || route.name === "invite") {
+    return "library";
+  }
+
+  return route.name;
 }

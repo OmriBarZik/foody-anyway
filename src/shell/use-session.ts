@@ -11,11 +11,20 @@ export function useSession(): SessionState {
 
   const refresh = useCallback(async () => {
     try {
-      const [config, me] = await Promise.all([fetchConfig(), fetchMe()]);
+      const config = await fetchConfig();
       setGoogle(config.google);
+    } catch {
+      setStatus("error");
+
+      return;
+    }
+
+    try {
+      const me = await fetchMe();
       setUser(me);
       setStatus(me ? "ready" : "signedOut");
     } catch {
+      setUser(null);
       setStatus("error");
     }
   }, []);
