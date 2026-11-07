@@ -3,11 +3,23 @@ import type { Db } from "../db/db.types";
 import type { FoodyAuth } from "../auth/create-foody-auth";
 import type { AppConfig } from "../config/config.types";
 import { findRecipe, listRecipes } from "../db/recipes";
+import { describeError } from "../library/extraction/extraction-log";
+import { retryRecipe } from "../library/retry/retry-recipe";
+import type { RetryRefusalCode } from "../library/retry/retry.types";
 import { SaveLinkError, saveLink } from "../library/save-link";
 import { isRecord } from "../shared/is-record";
 import { jsonError } from "./json-error";
 import { pathParam, readJson } from "./request";
 import { requireUser } from "./require-user";
+
+/** HTTP status for each reason a retry is turned down. */
+const RETRY_REFUSAL_STATUS: Record<RetryRefusalCode, number> = {
+  not_found: 404,
+  already_ready: 409,
+  retry_in_progress: 409,
+  retry_limit_recipe: 429,
+  retry_limit_daily: 429,
+};
 
 /** Videos saved in the signed-in kitchen. */
 export async function getRecipes({
@@ -81,8 +93,7 @@ export async function postRecipe({
   try {
     const recipe = await saveLink({
       db,
-      geminiApiKey: config.geminiApiKey,
-      geminiModel: config.geminiModel,
+      gemini: { apiKey: config.geminiApiKey, model: config.geminiModel },
       householdId: current.household.id,
       userId: current.user.id,
       rawUrl: body.url,
@@ -94,8 +105,60 @@ export async function postRecipe({
       return jsonError({ status: 400, code: error.code });
     }
 
-    console.error(error instanceof Error ? error.message : "Error");
+    logRouteError({ route: "POST /api/recipes", error, secret: config.geminiApiKey });
 
     return jsonError({ status: 500, code: "save_failed" });
   }
+}
+
+/**
+ * Read a saved video again. Only for a recipe in the caller's kitchen that is not ready yet,
+ * and only within the per-recipe, per-person, and per-kitchen limits in claim-retry.
+ */
+export async function postRecipeRetry({
+  request,
+  db,
+  auth,
+  config,
+}: {
+  request: Request;
+  db: Db;
+  auth: FoodyAuth;
+  config: AppConfig;
+}): Promise<Response> {
+  const current = await requireUser({ auth, db, request });
+
+  if (current instanceof Response) {
+    return current;
+  }
+
+  const recipeId = pathParam({ request, index: 3 });
+
+  if (!recipeId) {
+    return jsonError({ status: 404, code: "not_found" });
+  }
+
+  try {
+    const outcome = await retryRecipe({
+      db,
+      gemini: { apiKey: config.geminiApiKey, model: config.geminiModel },
+      householdId: current.household.id,
+      userId: current.user.id,
+      recipeId,
+    });
+
+    if (outcome.status === "refused") {
+      return jsonError({ status: RETRY_REFUSAL_STATUS[outcome.code], code: outcome.code });
+    }
+
+    return Response.json(outcome.recipe);
+  } catch (error) {
+    logRouteError({ route: "POST /api/recipes/:id/retry", error, secret: config.geminiApiKey });
+
+    return jsonError({ status: 500, code: "save_failed" });
+  }
+}
+
+function logRouteError({ route, error, secret }: { route: string; error: unknown; secret: string | null }): void {
+  console.error(JSON.stringify({ scope: "route", level: "error", route, ...describeError({ error, secret }) }));
 }

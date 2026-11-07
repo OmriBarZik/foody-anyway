@@ -97,6 +97,11 @@ export async function saveRecipe(url: string): Promise<RecipeView> {
   return readOk(await fetch("/api/recipes", { method: "POST", headers: jsonHeaders(), body: JSON.stringify({ url }) }));
 }
 
+/** Read a saved video again. The server limits how often this can run. */
+export async function retryRecipe(recipeId: string): Promise<RecipeView> {
+  return readOk(await fetch(`/api/recipes/${encodeURIComponent(recipeId)}/retry`, { method: "POST" }));
+}
+
 /** Everything in the shared kitchen. */
 export async function fetchStock(): Promise<StockItemView[]> {
   return readOk(await fetch("/api/stock"));
