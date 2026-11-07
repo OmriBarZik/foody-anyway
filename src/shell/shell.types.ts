@@ -88,7 +88,7 @@ export type UiCopy = {
     retry: string;
     retrying: string;
     retryInProgress: string;
-    retryLimitRecipe: string;
+    retryRateLimited: string;
     retryLimitDaily: string;
     retryFailed: string;
     missing: string;

@@ -12,8 +12,8 @@ export async function insertAttempt({ db, attempt }: { db: Db; attempt: AttemptW
 }
 
 /**
- * Retry counts for the limits: all retries of this recipe, retries by this person and this kitchen in the
- * last 24 hours, and whether any read of this recipe began in the last `inProgressSeconds`.
+ * Retry counts for the limits: retries by this person and this kitchen in the last minute and the last
+ * 24 hours, and whether any read of this recipe began in the last `inProgressSeconds`.
  */
 export async function readRetryUsage({
   db,
@@ -32,7 +32,10 @@ export async function readRetryUsage({
     .query<RetryUsageRow>(
       `SELECT
         (SELECT count(*)::int FROM extraction_attempts
-          WHERE recipe_id = ? AND trigger = 'retry') AS recipe_retries,
+          WHERE user_id = ? AND trigger = 'retry' AND created_at > now() - interval '1 minute') AS user_retries_minute,
+        (SELECT count(*)::int FROM extraction_attempts
+          WHERE household_id = ? AND trigger = 'retry' AND created_at > now() - interval '1 minute')
+          AS household_retries_minute,
         (SELECT count(*)::int FROM extraction_attempts
           WHERE user_id = ? AND trigger = 'retry' AND created_at > now() - interval '24 hours') AS user_retries_today,
         (SELECT count(*)::int FROM extraction_attempts
@@ -41,10 +44,11 @@ export async function readRetryUsage({
         (SELECT count(*)::int FROM extraction_attempts
           WHERE recipe_id = ? AND created_at > now() - make_interval(secs => ?::int)) AS recent_attempts`,
     )
-    .get(recipeId, userId, householdId, recipeId, inProgressSeconds);
+    .get(userId, householdId, userId, householdId, recipeId, inProgressSeconds);
 
   return {
-    recipeRetries: row?.recipe_retries ?? 0,
+    userRetriesLastMinute: row?.user_retries_minute ?? 0,
+    householdRetriesLastMinute: row?.household_retries_minute ?? 0,
     userRetriesToday: row?.user_retries_today ?? 0,
     householdRetriesToday: row?.household_retries_today ?? 0,
     recentAttemptOnRecipe: (row?.recent_attempts ?? 0) > 0,
