@@ -22,8 +22,11 @@ export function KitchenPages({
   selectedId,
   recipe,
   missing,
+  retrying,
+  retryError,
   onOpen,
   onSave,
+  onRetry,
   onUser,
   onRefresh,
 }: {
@@ -36,8 +39,11 @@ export function KitchenPages({
   selectedId: string | null;
   recipe: RecipeView | null;
   missing: boolean;
+  retrying: boolean;
+  retryError: string | null;
   onOpen: (recipeId: string) => void;
   onSave: (url: string) => void;
+  onRetry: (recipeId: string) => void;
   onUser: (user: UserView) => void;
   onRefresh: () => Promise<void>;
 }) {
@@ -82,7 +88,15 @@ export function KitchenPages({
         />
       </div>
       <div className={styles.detailColumn}>
-        <RecipeScreen recipe={recipe} measurement={user.measurement} missing={missing} onBack={() => go("/")} />
+        <RecipeScreen
+          recipe={recipe}
+          measurement={user.measurement}
+          missing={missing}
+          retrying={retrying}
+          retryError={retryError}
+          onBack={() => go("/")}
+          onRetry={onRetry}
+        />
       </div>
     </div>
   );

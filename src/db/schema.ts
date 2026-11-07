@@ -115,6 +115,21 @@ CREATE TABLE IF NOT EXISTS extraction_costs (
 
 CREATE INDEX IF NOT EXISTS extraction_costs_recipe ON extraction_costs (recipe_id);
 
+-- One row per time a link is read, by a save or a retry. Rows are kept when a recipe goes away,
+-- so deleting and re-saving a link cannot reset anyone's retry allowance.
+CREATE TABLE IF NOT EXISTS extraction_attempts (
+  id text primary key,
+  recipe_id text not null,
+  household_id text not null,
+  user_id text not null references "user" (id) on delete cascade,
+  trigger text not null check (trigger in ('save', 'retry')),
+  created_at timestamptz not null default now()
+);
+
+CREATE INDEX IF NOT EXISTS extraction_attempts_recipe ON extraction_attempts (recipe_id, created_at);
+CREATE INDEX IF NOT EXISTS extraction_attempts_user ON extraction_attempts (user_id, created_at);
+CREATE INDEX IF NOT EXISTS extraction_attempts_household ON extraction_attempts (household_id, created_at);
+
 CREATE TABLE IF NOT EXISTS stock_items (
   id text primary key,
   household_id text not null references households (id) on delete cascade,

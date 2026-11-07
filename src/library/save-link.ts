@@ -1,14 +1,12 @@
 import type { Db } from "../db/db.types";
 
-import { insertCost } from "../db/costs";
-import type { RecipeWrite } from "../db/db.types";
-import { findRecipe, findRecipeBySource, insertRecipe, updateRecipeContent } from "../db/recipes";
-import type { Ingredient, RecipeView } from "../domain/domain.types";
-import { measurementOf } from "./convert-units";
-import { crawlDetectedLink } from "./crawl-page";
+import { insertAttempt } from "../db/attempts/extraction-attempts";
+import { findRecipe, findRecipeBySource, insertRecipe } from "../db/recipes";
+import type { RecipeView } from "../domain/domain.types";
 import { detectPlatform } from "./detect-platform";
-import { extractYoutubeRecipe, translateIngredientNames } from "./extract-video";
-import type { CrawlResult, ExtractedRecipe, ModelUsage } from "./library.types";
+import type { GeminiSettings } from "./extraction/extraction.types";
+import { emptyDraft } from "./extraction/finish-draft";
+import { runExtraction } from "./extraction/run-extraction";
 
 /** Thrown when the pasted text is not a YouTube, TikTok, Instagram, or Pinterest link. */
 export class SaveLinkError extends Error {
@@ -25,15 +23,13 @@ export class SaveLinkError extends Error {
  */
 export async function saveLink({
   db,
-  geminiApiKey,
-  geminiModel,
+  gemini,
   householdId,
   userId,
   rawUrl,
 }: {
   db: Db;
-  geminiApiKey: string | null;
-  geminiModel: string;
+  gemini: GeminiSettings;
   householdId: string;
   userId: string;
   rawUrl: string;
@@ -51,16 +47,9 @@ export async function saveLink({
   }
 
   const recipeId = crypto.randomUUID();
-  const draft = emptyDraft({
-    recipeId,
-    householdId,
-    userId,
-    sourceUrl: detected.canonicalUrl,
-    platform: detected.platform,
-  });
 
   try {
-    await insertRecipe({ db, recipe: draft });
+    await insertRecipe({ db, recipe: emptyDraft({ recipeId, householdId, userId, detected }) });
   } catch (error) {
     // A second save of the same link should open the first one.
     const raced = await findRecipeBySource({ db, householdId, sourceUrl: detected.canonicalUrl });
@@ -72,70 +61,8 @@ export async function saveLink({
     throw error;
   }
 
-  const crawl = await crawlDetectedLink(detected);
-  await recordCost({
-    db,
-    recipeId,
-    provider: "crawler",
-    model: null,
-    origin: "page_fetch",
-    usd: 0,
-    inputTokens: null,
-    outputTokens: null,
-    durationMs: crawl.durationMs,
-    note: crawl.note,
-  });
-
-  let chosen = crawl.recipe;
-  let videoFailed = false;
-
-  if (!isFollowable(chosen) && detected.platform === "youtube" && geminiApiKey) {
-    try {
-      const video = await extractYoutubeRecipe({
-        apiKey: geminiApiKey,
-        model: geminiModel,
-        youtubeUrl: detected.canonicalUrl,
-      });
-      await recordUsage({ db, recipeId, origin: "video_understanding", usage: video.usage });
-      chosen = video.recipe ?? chosen;
-      videoFailed = video.recipe === null;
-    } catch (error) {
-      // Keep the link even when the model request fails.
-      console.error(error instanceof Error ? error.message : "Error");
-      await recordCost({
-        db,
-        recipeId,
-        provider: "google",
-        model: geminiModel,
-        origin: "video_understanding",
-        usd: 0,
-        inputTokens: null,
-        outputTokens: null,
-        durationMs: 0,
-        note: "The video request failed before usage was returned.",
-      });
-      videoFailed = true;
-    }
-  }
-
-  if (isFollowable(chosen) && geminiApiKey && needsTranslation(chosen.ingredients)) {
-    chosen = {
-      ...chosen,
-      ingredients: await fillTranslations({
-        db,
-        recipeId,
-        apiKey: geminiApiKey,
-        model: geminiModel,
-        ingredients: stampKnownNames({
-          ingredients: chosen.ingredients,
-          language: chosen.sourceLanguage ?? crawl.language,
-        }),
-      }),
-    };
-  }
-
-  const finished = finishDraft({ draft, crawl, recipe: chosen, videoFailed });
-  await updateRecipeContent({ db, recipe: finished });
+  await insertAttempt({ db, attempt: { recipeId, householdId, userId, trigger: "save" } });
+  await runExtraction({ db, gemini, detected, recipeId, householdId, userId, trigger: "save" });
   const saved = await findRecipe({ db, householdId, recipeId });
 
   if (!saved) {
@@ -143,213 +70,4 @@ export async function saveLink({
   }
 
   return saved;
-}
-
-function isFollowable(recipe: ExtractedRecipe | null): recipe is ExtractedRecipe {
-  if (!recipe?.isRecipe) {
-    return false;
-  }
-
-  return recipe.ingredients.length > 0 && recipe.steps.length > 0;
-}
-
-function needsTranslation(ingredients: Ingredient[]): boolean {
-  return ingredients.some((ingredient) => !ingredient.nameEn || !ingredient.nameHe);
-}
-
-function stampKnownNames({
-  ingredients,
-  language,
-}: {
-  ingredients: Ingredient[];
-  language: string | null;
-}): Ingredient[] {
-  return ingredients.map((ingredient) => {
-    if (language === "en" && !ingredient.nameEn) {
-      return { ...ingredient, nameEn: ingredient.name };
-    }
-
-    if (language === "he" && !ingredient.nameHe) {
-      return { ...ingredient, nameHe: ingredient.name };
-    }
-
-    return ingredient;
-  });
-}
-
-async function fillTranslations({
-  db,
-  recipeId,
-  apiKey,
-  model,
-  ingredients,
-}: {
-  db: Db;
-  recipeId: string;
-  apiKey: string;
-  model: string;
-  ingredients: Ingredient[];
-}): Promise<Ingredient[]> {
-  try {
-    const translated = await translateIngredientNames({
-      apiKey,
-      model,
-      names: ingredients.map((ingredient) => ingredient.name),
-    });
-    await recordUsage({ db, recipeId, origin: "ingredient_translation", usage: translated.usage });
-
-    if (translated.names.length !== ingredients.length) {
-      return ingredients;
-    }
-
-    return ingredients.map((ingredient, index) => {
-      const name = translated.names[index];
-
-      if (!name) {
-        return ingredient;
-      }
-
-      return {
-        ...ingredient,
-        nameEn: name.nameEn ?? ingredient.nameEn,
-        nameHe: name.nameHe ?? ingredient.nameHe,
-      };
-    });
-  } catch (error) {
-    // The recipe text is already usable. Missing translations fall back to the source name.
-    console.error(error instanceof Error ? error.message : "Error");
-    await recordCost({
-      db,
-      recipeId,
-      provider: "google",
-      model,
-      origin: "ingredient_translation",
-      usd: 0,
-      inputTokens: null,
-      outputTokens: null,
-      durationMs: 0,
-      note: "Ingredient translation failed before usage was returned.",
-    });
-
-    return ingredients;
-  }
-}
-
-function finishDraft({
-  draft,
-  crawl,
-  recipe,
-  videoFailed,
-}: {
-  draft: RecipeWrite;
-  crawl: CrawlResult;
-  recipe: ExtractedRecipe | null;
-  videoFailed: boolean;
-}): RecipeWrite {
-  const notARecipe = recipe !== null && !recipe.isRecipe;
-  const followable = isFollowable(recipe);
-  const status = followable ? "ready" : videoFailed ? "failed" : "needs_review";
-  const note = followable ? null : videoFailed ? "video_failed" : notARecipe ? "not_a_recipe" : crawl.note;
-
-  return {
-    ...draft,
-    thumbnailUrl: crawl.thumbnailUrl,
-    dishImageUrl: crawl.dishImageUrl,
-    title: recipe?.title ?? crawl.title,
-    servings: recipe?.servings ?? null,
-    cookTime: recipe?.cookTime ?? null,
-    ingredients: recipe?.ingredients ?? [],
-    steps: recipe?.steps ?? [],
-    sourceLanguage: recipe?.sourceLanguage ?? crawl.language,
-    sourceMeasurement: recipe?.sourceMeasurement ?? (recipe ? measurementOf(recipe.ingredients) : null),
-    extractionStatus: status,
-    extractionNote: note,
-  };
-}
-
-function emptyDraft({
-  recipeId,
-  householdId,
-  userId,
-  sourceUrl,
-  platform,
-}: {
-  recipeId: string;
-  householdId: string;
-  userId: string;
-  sourceUrl: string;
-  platform: RecipeWrite["platform"];
-}): RecipeWrite {
-  return {
-    id: recipeId,
-    householdId,
-    savedByUserId: userId,
-    sourceUrl,
-    platform,
-    thumbnailUrl: null,
-    dishImageUrl: null,
-    title: null,
-    servings: null,
-    cookTime: null,
-    ingredients: [],
-    steps: [],
-    sourceLanguage: null,
-    sourceMeasurement: null,
-    extractionStatus: "pending",
-    extractionNote: null,
-  };
-}
-
-async function recordUsage({
-  db,
-  recipeId,
-  origin,
-  usage,
-}: {
-  db: Db;
-  recipeId: string;
-  origin: string;
-  usage: ModelUsage;
-}): Promise<void> {
-  await recordCost({
-    db,
-    recipeId,
-    provider: "google",
-    model: usage.model,
-    origin,
-    usd: usage.usd,
-    inputTokens: usage.inputTokens,
-    outputTokens: usage.outputTokens,
-    durationMs: usage.durationMs,
-    note: usage.note,
-  });
-}
-
-async function recordCost({
-  db,
-  recipeId,
-  provider,
-  model,
-  origin,
-  usd,
-  inputTokens,
-  outputTokens,
-  durationMs,
-  note,
-}: {
-  db: Db;
-  recipeId: string;
-  provider: string;
-  model: string | null;
-  origin: string;
-  usd: number;
-  inputTokens: number | null;
-  outputTokens: number | null;
-  durationMs: number;
-  note: string | null;
-}): Promise<void> {
-  await insertCost({
-    db,
-    cost: { recipeId, provider, model, origin, usd, inputTokens, outputTokens, durationMs, note },
-  });
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { RecipeView, UserView } from "../../domain/domain.types";
-import { ApiError, fetchRecipe, fetchRecipes, saveRecipe } from "../api";
+import { ApiError, fetchRecipe, fetchRecipes, retryRecipe, saveRecipe } from "../api";
 import styles from "../app.module.css";
 import type { AppRoute } from "../shell.types";
 import { InviteBanner } from "./invite-banner";
@@ -27,6 +27,8 @@ export function Kitchen({
   const [errorCode, setErrorCode] = useState<string | null>(null);
   const [opened, setOpened] = useState<RecipeView | null>(null);
   const [missing, setMissing] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
   const selectedId = route.name === "recipe" ? route.recipeId : null;
   const listed = recipes.find((recipe) => recipe.id === selectedId) ?? null;
   const recipe = listed ?? (opened?.id === selectedId ? opened : null);
@@ -89,6 +91,21 @@ export function Kitchen({
     setSaving(false);
   }
 
+  async function onRetry(recipeId: string): Promise<void> {
+    setRetrying(true);
+    setRetryError(null);
+
+    try {
+      const retried = await retryRecipe(recipeId);
+      setOpened(retried);
+      setRecipes(await fetchRecipes());
+    } catch (error) {
+      setRetryError(error instanceof ApiError ? error.code : "save_failed");
+    }
+
+    setRetrying(false);
+  }
+
   return (
     <main className={styles.shell}>
       <div className={styles.rail}>
@@ -110,8 +127,14 @@ export function Kitchen({
             selectedId={selectedId}
             recipe={recipe}
             missing={missing}
-            onOpen={(recipeId) => go(`/recipes/${recipeId}`)}
+            retrying={retrying}
+            retryError={retryError}
+            onOpen={(recipeId) => {
+              setRetryError(null);
+              go(`/recipes/${recipeId}`);
+            }}
             onSave={(url) => void onSave(url)}
+            onRetry={(recipeId) => void onRetry(recipeId)}
             onUser={onUser}
             onRefresh={onRefresh}
           />

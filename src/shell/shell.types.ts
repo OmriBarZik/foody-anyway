@@ -85,6 +85,12 @@ export type UiCopy = {
     needsReview: string;
     failed: string;
     pending: string;
+    retry: string;
+    retrying: string;
+    retryInProgress: string;
+    retryLimitRecipe: string;
+    retryLimitDaily: string;
+    retryFailed: string;
     missing: string;
     openVideo: string;
     timeAndServings: string;

@@ -9,12 +9,18 @@ export function RecipeScreen({
   recipe,
   measurement,
   missing,
+  retrying,
+  retryError,
   onBack,
+  onRetry,
 }: {
   recipe: RecipeView | null;
   measurement: MeasurementSystem;
   missing: boolean;
+  retrying: boolean;
+  retryError: string | null;
   onBack: () => void;
+  onRetry: (recipeId: string) => void;
 }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language === "he" ? "he" : "en";
@@ -52,7 +58,19 @@ export function RecipeScreen({
       <p className={styles.byline}>{t("library.savedBy", { name: recipe.savedByName })}</p>
       {detail ? <p className={styles.detailLine}>{detail}</p> : null}
       {recipe.extractionStatus !== "ready" ? (
-        <p className={styles.notice}>{t(`recipe.${recipe.extractionStatus}`)}</p>
+        <>
+          <p className={styles.notice}>{t(statusKey(recipe.extractionStatus))}</p>
+          <p>
+            <button type="button" className={styles.pineButton} disabled={retrying} onClick={() => onRetry(recipe.id)}>
+              {retrying ? t("recipe.retrying") : t("recipe.retry")}
+            </button>
+          </p>
+          {retryError ? (
+            <p className={styles.alert} role="alert">
+              {t(retryErrorKey(retryError))}
+            </p>
+          ) : null}
+        </>
       ) : null}
       <p>
         <a className={styles.videoLink} href={recipe.sourceUrl} target="_blank" rel="noreferrer">
@@ -88,6 +106,30 @@ export function RecipeScreen({
       ) : null}
     </article>
   );
+}
+
+function statusKey(status: RecipeView["extractionStatus"]): string {
+  if (status === "needs_review") {
+    return "recipe.needsReview";
+  }
+
+  return `recipe.${status}`;
+}
+
+function retryErrorKey(code: string): string {
+  if (code === "retry_in_progress") {
+    return "recipe.retryInProgress";
+  }
+
+  if (code === "retry_limit_recipe") {
+    return "recipe.retryLimitRecipe";
+  }
+
+  if (code === "retry_limit_daily") {
+    return "recipe.retryLimitDaily";
+  }
+
+  return "recipe.retryFailed";
 }
 
 function detailLine({
