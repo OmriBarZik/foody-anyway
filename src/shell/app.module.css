@@ -245,6 +245,8 @@
 }
 
 .pasteField {
+  box-sizing: border-box;
+  min-width: 0;
   flex: 1 1 220px;
   border: 1px solid var(--line);
   border-radius: 999px;
@@ -452,6 +454,8 @@
 
 .stockSection {
   margin: 0;
+  min-width: 0;
+  container-type: inline-size;
 }
 
 .stockList {
@@ -463,10 +467,19 @@
 .stockRow {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 12px;
+  gap: 8px 12px;
   align-items: center;
   padding-block: 8px;
   border-bottom: 1px solid var(--line);
+}
+
+.stockRow > span:first-child {
+  overflow-wrap: anywhere;
+}
+
+.stockRow > :last-child {
+  grid-column: -2;
+  grid-row: 1;
 }
 
 .stockCheck {
@@ -479,10 +492,32 @@
 .stockEdit {
   display: flex;
   gap: 8px;
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.stockEdit .amountField,
+.stockEdit .unitField {
+  flex: 1 1 0;
+}
+
+/* Wide enough: keep amount and unit on the same line as the name. */
+@container (min-width: 440px) {
+  .stockEdit {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .stockEdit .amountField,
+  .stockEdit .unitField {
+    flex: none;
+  }
 }
 
 .amountField,
 .unitField {
+  box-sizing: border-box;
+  min-width: 0;
   width: 6.5rem;
   border: 1px solid var(--line);
   border-radius: 999px;
