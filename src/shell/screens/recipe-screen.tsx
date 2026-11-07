@@ -121,8 +121,8 @@ function retryErrorKey(code: string): string {
     return "recipe.retryInProgress";
   }
 
-  if (code === "retry_limit_recipe") {
-    return "recipe.retryLimitRecipe";
+  if (code === "retry_rate_limited") {
+    return "recipe.retryRateLimited";
   }
 
   if (code === "retry_limit_daily") {

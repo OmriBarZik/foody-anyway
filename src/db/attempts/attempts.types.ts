@@ -9,9 +9,10 @@ export type AttemptWrite = {
   trigger: ExtractionTrigger;
 };
 
-/** How often a recipe, a person, and a kitchen have asked to read a video again. */
+/** How often a person and a kitchen asked to read a video again, and whether this recipe is being read now. */
 export type RetryUsage = {
-  recipeRetries: number;
+  userRetriesLastMinute: number;
+  householdRetriesLastMinute: number;
   userRetriesToday: number;
   householdRetriesToday: number;
   recentAttemptOnRecipe: boolean;
@@ -19,7 +20,8 @@ export type RetryUsage = {
 
 /** A row of counts read back from Postgres. */
 export type RetryUsageRow = {
-  recipe_retries: number;
+  user_retries_minute: number;
+  household_retries_minute: number;
   user_retries_today: number;
   household_retries_today: number;
   recent_attempts: number;

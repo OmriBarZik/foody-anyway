@@ -2,7 +2,7 @@ import type { RecipeView } from "../../domain/domain.types";
 
 /** Why a retry was turned down. Each maps to one HTTP status and one sentence in the app. */
 export type RetryRefusalCode =
-  "not_found" | "already_ready" | "retry_in_progress" | "retry_limit_recipe" | "retry_limit_daily";
+  "not_found" | "already_ready" | "retry_in_progress" | "retry_rate_limited" | "retry_limit_daily";
 
 /** A retry that may run: the attempt is recorded and the row is pending. */
 export type RetryClaimed = {

@@ -5,17 +5,20 @@ import { findRecipe } from "../../db/recipes";
 import { createExtractionLog } from "../extraction/extraction-log";
 import type { RetryClaim, RetryRefusalCode } from "./retry.types";
 
-/** Retries allowed on one recipe, ever. */
-export const RETRIES_PER_RECIPE = 3;
+/** Retries one person may start in a rolling minute, across every recipe. */
+export const RETRIES_PER_USER_PER_MINUTE = 3;
 
-/** Retries one person may start in 24 hours, across every recipe. */
-export const RETRIES_PER_USER_PER_DAY = 10;
+/** Retries one kitchen may start in a rolling minute, across every member. */
+export const RETRIES_PER_HOUSEHOLD_PER_MINUTE = 6;
 
-/** Retries one kitchen may start in 24 hours, across every member. */
-export const RETRIES_PER_HOUSEHOLD_PER_DAY = 20;
+/** Ceiling on retries one person may start in 24 hours, so a script cannot run up the Gemini bill all day. */
+export const RETRIES_PER_USER_PER_DAY = 100;
 
-/** A read that began this recently may still be running, so a new one waits. Longer than the 60s route limit. */
-export const IN_PROGRESS_SECONDS = 120;
+/** Ceiling on retries one kitchen may start in 24 hours. */
+export const RETRIES_PER_HOUSEHOLD_PER_DAY = 200;
+
+/** A read that began this recently may still be running, so a new one waits. Just over the 60s route limit. */
+export const IN_PROGRESS_SECONDS = 65;
 
 /**
  * Check every limit and, if they pass, record the attempt and mark the recipe pending, all in one transaction.
@@ -64,8 +67,11 @@ export async function claimRetry({
       return refuse("retry_in_progress");
     }
 
-    if (usage.recipeRetries >= RETRIES_PER_RECIPE) {
-      return refuse("retry_limit_recipe");
+    if (
+      usage.userRetriesLastMinute >= RETRIES_PER_USER_PER_MINUTE ||
+      usage.householdRetriesLastMinute >= RETRIES_PER_HOUSEHOLD_PER_MINUTE
+    ) {
+      return refuse("retry_rate_limited");
     }
 
     if (

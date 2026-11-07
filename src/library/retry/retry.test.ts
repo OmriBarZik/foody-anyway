@@ -3,7 +3,7 @@ import { afterEach, beforeEach, expect, test, vi } from "vitest";
 import type { AttemptRow } from "../../db/attempts/attempts.types";
 import type { Db } from "../../db/db.types";
 import { openMemoryDb } from "../../db/testing/open-memory-db";
-import { claimRetry, RETRIES_PER_RECIPE, RETRIES_PER_USER_PER_DAY } from "./claim-retry";
+import { claimRetry, RETRIES_PER_USER_PER_DAY, RETRIES_PER_USER_PER_MINUTE } from "./claim-retry";
 import { retryRecipe } from "./retry-recipe";
 
 const GEMINI_OFF = { apiKey: null, model: "gemini-2.5-flash" };
@@ -64,27 +64,34 @@ test("a second retry right after the first waits for it to finish", async () => 
   expect(await countAttempts(db)).toBe(1);
 });
 
-test("one recipe stops after its retry allowance", async () => {
+test("one recipe can be retried again and again, a minute apart", async () => {
   const db = await kitchenWith({ recipes: { soup: "failed" } });
-  await addOldRetries({ db, recipeId: "soup", count: RETRIES_PER_RECIPE, hoursAgo: 48 });
+  await addOldRetries({ db, recipeId: "soup", count: 10, hoursAgo: 2 });
 
-  expect(await claimRetry({ db, householdId: "home", userId: "ada", recipeId: "soup" })).toEqual({
+  expect((await claimRetry({ db, householdId: "home", userId: "ada", recipeId: "soup" })).status).toBe("claimed");
+});
+
+test("one person is slowed down after the per-minute allowance across recipes", async () => {
+  const recipeIds = Array.from({ length: RETRIES_PER_USER_PER_MINUTE + 1 }, (_, index) => `dish-${index}`);
+  const db = await kitchenWith({ recipes: Object.fromEntries(recipeIds.map((recipeId) => [recipeId, "failed"])) });
+
+  for (const recipeId of recipeIds.slice(0, RETRIES_PER_USER_PER_MINUTE)) {
+    expect((await claimRetry({ db, householdId: "home", userId: "ada", recipeId })).status).toBe("claimed");
+  }
+
+  const last = recipeIds[RETRIES_PER_USER_PER_MINUTE] ?? "";
+
+  expect(await claimRetry({ db, householdId: "home", userId: "ada", recipeId: last })).toEqual({
     status: "refused",
-    code: "retry_limit_recipe",
+    code: "retry_rate_limited",
   });
 });
 
-test("one person stops after the daily allowance across recipes", async () => {
-  const recipeIds = Array.from({ length: RETRIES_PER_USER_PER_DAY + 1 }, (_, index) => `dish-${index}`);
-  const db = await kitchenWith({ recipes: Object.fromEntries(recipeIds.map((recipeId) => [recipeId, "failed"])) });
+test("one person stops after the daily ceiling across recipes", async () => {
+  const db = await kitchenWith({ recipes: { soup: "needs_review", stew: "failed" } });
+  await addOldRetries({ db, recipeId: "soup", count: RETRIES_PER_USER_PER_DAY, hoursAgo: 1 });
 
-  for (const recipeId of recipeIds.slice(0, RETRIES_PER_USER_PER_DAY)) {
-    await addOldRetries({ db, recipeId, count: 1, hoursAgo: 1 });
-  }
-
-  const last = recipeIds[RETRIES_PER_USER_PER_DAY] ?? "";
-
-  expect(await claimRetry({ db, householdId: "home", userId: "ada", recipeId: last })).toEqual({
+  expect(await claimRetry({ db, householdId: "home", userId: "ada", recipeId: "stew" })).toEqual({
     status: "refused",
     code: "retry_limit_daily",
   });

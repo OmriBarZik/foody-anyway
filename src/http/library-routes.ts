@@ -4,6 +4,7 @@ import type { FoodyAuth } from "../auth/create-foody-auth";
 import type { AppConfig } from "../config/config.types";
 import { findRecipe, listRecipes } from "../db/recipes";
 import { describeError } from "../library/extraction/extraction-log";
+import { IN_PROGRESS_SECONDS } from "../library/retry/claim-retry";
 import { retryRecipe } from "../library/retry/retry-recipe";
 import type { RetryRefusalCode } from "../library/retry/retry.types";
 import { SaveLinkError, saveLink } from "../library/save-link";
@@ -17,8 +18,15 @@ const RETRY_REFUSAL_STATUS: Record<RetryRefusalCode, number> = {
   not_found: 404,
   already_ready: 409,
   retry_in_progress: 409,
-  retry_limit_recipe: 429,
+  retry_rate_limited: 429,
   retry_limit_daily: 429,
+};
+
+/** Seconds to send in Retry-After, for refusals that clear on their own. */
+const RETRY_WAIT_SECONDS: Partial<Record<RetryRefusalCode, number>> = {
+  retry_in_progress: IN_PROGRESS_SECONDS,
+  retry_rate_limited: 60,
+  retry_limit_daily: 24 * 60 * 60,
 };
 
 /** Videos saved in the signed-in kitchen. */
@@ -148,7 +156,7 @@ export async function postRecipeRetry({
     });
 
     if (outcome.status === "refused") {
-      return jsonError({ status: RETRY_REFUSAL_STATUS[outcome.code], code: outcome.code });
+      return refusedRetry(outcome.code);
     }
 
     return Response.json(outcome.recipe);
@@ -157,6 +165,17 @@ export async function postRecipeRetry({
 
     return jsonError({ status: 500, code: "save_failed" });
   }
+}
+
+function refusedRetry(code: RetryRefusalCode): Response {
+  const response = jsonError({ status: RETRY_REFUSAL_STATUS[code], code });
+  const waitSeconds = RETRY_WAIT_SECONDS[code];
+
+  if (waitSeconds) {
+    response.headers.set("Retry-After", String(waitSeconds));
+  }
+
+  return response;
 }
 
 function logRouteError({ route, error, secret }: { route: string; error: unknown; secret: string | null }): void {
