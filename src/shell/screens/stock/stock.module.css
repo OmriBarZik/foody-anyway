@@ -1,0 +1,190 @@
+.quickCheck {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius-card);
+  background: var(--lime);
+  text-decoration: none;
+}
+
+.cards {
+  flex: none;
+  position: relative;
+  width: 48px;
+  height: 48px;
+}
+
+.cards span {
+  position: absolute;
+  border-radius: 10px;
+}
+
+.cards span:first-child {
+  inset: 4px 0 0 8px;
+  background: #a9d12e;
+  transform: rotate(8deg);
+}
+
+.cards span:last-child {
+  inset: 0 8px 4px 0;
+  background: #fff;
+  transform: rotate(-6deg);
+}
+
+.quickTitle {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.quickSub {
+  font-size: 13px;
+  color: #2e3a10;
+}
+
+.forward {
+  display: flex;
+}
+
+:global([dir="rtl"]) .forward {
+  transform: scaleX(-1);
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-inline: -20px;
+  padding-inline: 20px;
+  scrollbar-width: none;
+}
+
+.tab {
+  flex: none;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.tab[aria-selected="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: #fff;
+}
+
+.count {
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+.out {
+  font-size: 12px;
+  color: #b33a12;
+}
+
+.stepper {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 22px;
+  background: var(--bg);
+}
+
+.stepper button {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 20px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.stepper button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.stepper .more {
+  background: var(--surface);
+}
+
+.amount {
+  min-width: 48px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.switch {
+  flex: none;
+  width: 52px;
+  height: 32px;
+  padding: 3px;
+  border: 0;
+  border-radius: 16px;
+  background: #d5d7cf;
+  display: flex;
+  justify-content: flex-start;
+  cursor: pointer;
+  transition: background 160ms ease;
+}
+
+.switch[aria-checked="true"] {
+  background: var(--lime-dot);
+  justify-content: flex-end;
+}
+
+.knob {
+  width: 26px;
+  height: 26px;
+  border-radius: 13px;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 20%);
+}
+
+.remove {
+  flex: none;
+  width: 32px;
+  height: 44px;
+  margin-inline-end: -8px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.addCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+}
+
+.addCard p {
+  margin: 0;
+}
+
+.addPair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}

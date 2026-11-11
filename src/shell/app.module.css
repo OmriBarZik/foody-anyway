@@ -1,766 +1,285 @@
 .page {
   box-sizing: border-box;
-  max-width: 440px;
-  margin-inline: auto;
-  padding: 28px 20px calc(32px + env(safe-area-inset-bottom));
-  min-height: 100dvh;
-}
-
-.signIn {
   width: 100%;
-  padding-top: 12vh;
+  max-width: var(--page-width);
+  margin-inline: auto;
+  padding: calc(28px + env(safe-area-inset-top)) 20px calc(128px + env(safe-area-inset-bottom));
   display: flex;
   flex-direction: column;
+  gap: 20px;
 }
 
-.shell {
-  box-sizing: border-box;
-  height: 100dvh;
+.loading {
+  min-height: 100dvh;
   display: grid;
-  grid-template-areas:
-    "bar"
-    "stage"
-    "nav";
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  overflow: hidden;
-  background: var(--paper);
+  place-items: center;
+  color: var(--muted);
 }
 
-.rail {
-  display: contents;
-}
-
-.stage {
-  grid-area: stage;
-  min-height: 0;
-  overflow: auto;
-  padding: 8px 20px 28px;
-}
-
-.stageIn {
-  min-height: 100%;
-}
-
-.top {
-  grid-area: bar;
+.header {
   display: flex;
-  flex-wrap: wrap;
+  align-items: flex-end;
   justify-content: space-between;
-  align-items: center;
-  gap: 12px 20px;
-  padding: 14px 16px 8px;
-}
-
-.brand {
-  margin: 0;
-  font-family: var(--serif);
-  font-size: clamp(2.75rem, 8vw, 3.5rem);
-  font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: 0.95;
-}
-
-.top .brand {
-  font-size: 1.75rem;
-  font-weight: 400;
-}
-
-.brandRule {
-  width: 40px;
-  height: 3px;
-  margin-top: 8px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--yolk);
-}
-
-.household {
-  margin: 8px 0 0;
-}
-
-.person {
-  display: flex;
-  align-items: center;
   gap: 12px;
 }
 
-.personName,
-.personMail {
-  margin: 0;
-}
-
-.personName {
-  font-weight: 500;
-}
-
-.controls {
+.headerText {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.sectionHead {
+  display: flex;
   align-items: center;
-  gap: 10px 16px;
-}
-
-.choice,
-.textButton {
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  cursor: pointer;
-}
-
-.choice {
-  padding: 4px 0;
-}
-
-.choice[aria-pressed="true"] {
-  box-shadow: inset 0 -3px 0 var(--yolk);
-  font-weight: 500;
-}
-
-.textButton {
-  color: var(--pine);
-  font-weight: 500;
-  padding: 0;
-}
-
-.picture {
-  width: 36px;
-  height: 36px;
-  object-fit: cover;
-  border-radius: 50%;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .lead {
-  max-width: 18rem;
-  margin-top: 3.5rem;
-  font-size: 1.25rem;
-  line-height: 1.55;
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
 }
 
-.signIn .brand {
-  font-size: clamp(2.75rem, 8vw, 3.5rem);
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  overflow: hidden;
 }
 
-.signIn .brandRule {
-  width: 56px;
-  height: 4px;
-  margin-top: 12px;
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.signIn .pineButton {
-  width: 100%;
-  margin-top: 4rem;
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--line-soft);
+  box-sizing: border-box;
 }
 
-.signIn .controls {
-  margin-top: auto;
-  padding-top: 4rem;
+.row:last-child {
+  border-bottom: 0;
 }
 
-.pineButton,
-.chiliButton {
+.rowText {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.rowTitle {
+  font-size: 15px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.rowSub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.avatar {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--lime);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 0;
-  border-radius: 999px;
-  min-height: 44px;
-  padding: 12px 18px;
-  color: white;
-  font: inherit;
-  gap: 10px;
-  font-weight: 500;
+  font-size: 15px;
+  font-weight: 700;
   text-decoration: none;
+  overflow: hidden;
+  border: 0;
   cursor: pointer;
 }
 
-.pineButton {
-  background: var(--pine);
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
-.googleMark {
-  width: 18px;
-  height: 18px;
+.iconButton {
   flex: none;
-  background: white;
+  width: 44px;
+  height: 44px;
+  border: 0;
   border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
 }
 
-.pineButton:hover {
-  background: var(--pine-deep);
+.iconButtonDark {
+  composes: iconButton;
+  background: var(--ink);
+  color: var(--lime);
 }
 
-.chiliButton {
-  background: var(--chili);
+.iconButtonGhost {
+  composes: iconButton;
+  background: transparent;
+  color: var(--muted);
 }
 
-.chiliButton:hover {
-  background: var(--chili-deep);
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
-.pineButton:disabled,
-.chiliButton:disabled {
+.button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.workspace {
-  display: block;
+.primary {
+  composes: button;
+  background: var(--lime);
+  color: var(--ink);
 }
 
-.detailColumn {
-  display: none;
+.dark {
+  composes: button;
+  background: var(--ink);
+  color: #fff;
 }
 
-.workspaceRecipe .listColumn {
-  display: none;
-}
-
-.workspaceRecipe .detailColumn {
-  display: block;
-}
-
-.paste {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  margin: 0 0 8px;
-  padding-bottom: 12px;
-  background: var(--paper);
-}
-
-.pasteLabel {
-  display: block;
-  font-size: 1rem;
-  font-weight: 400;
-  margin-bottom: 8px;
-}
-
-.pasteRow {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: 12px;
-}
-
-.pasteField {
-  box-sizing: border-box;
-  min-width: 0;
-  flex: 1 1 220px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
+.outline {
+  composes: button;
+  min-height: 44px;
   background: transparent;
-  color: inherit;
-  font: inherit;
-  font-size: 1rem;
-  padding: 0.75rem 1rem;
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+  font-size: 14px;
 }
 
-.recipeList {
-  list-style: none;
-  margin: 12px 0 0;
+.soft {
+  composes: button;
+  min-height: 44px;
+  padding: 0 16px 0 12px;
+  background: var(--lime-soft);
+  color: var(--lime-text);
+  font-size: 14px;
+}
+
+.textLink {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  border: 0;
   padding: 0;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
-}
-
-.recipeButton {
-  display: block;
-  width: 100%;
-  padding: 0 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 16px;
   background: transparent;
-  color: inherit;
-  text-align: start;
+  color: var(--lime-text);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
   cursor: pointer;
-  overflow: hidden;
 }
 
-.recipeButton[aria-current="true"] {
-  border-color: var(--pine);
-}
-
-.thumb,
-.heroImage {
-  display: block;
+.field {
+  box-sizing: border-box;
   width: 100%;
-  object-fit: cover;
-  background: var(--mist);
+  min-width: 0;
+  height: 52px;
+  padding: 0 16px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-field);
+  background: var(--surface);
+  font-size: 16px;
 }
 
-.thumb {
-  aspect-ratio: 16 / 9;
+.label {
+  font-size: 14px;
+  font-weight: 700;
 }
 
-.thumbWrap {
-  position: relative;
-  display: block;
-}
-
-.cardScrim {
-  position: absolute;
-  inset-inline: 0;
-  bottom: 0;
-  padding: 14px 16px;
-  background: color-mix(in srgb, var(--ink) 55%, transparent);
-}
-
-.heroImage {
-  aspect-ratio: 4 / 3;
-  border-radius: 16px;
-}
-
-.cardTitle,
-.recipeTitle,
-.sectionTitle,
-.guessName {
-  font-family: var(--serif);
-  font-weight: 500;
-  line-height: 1.1;
-}
-
-.cardTitle {
+.alert {
   margin: 0;
-  color: var(--paper);
-  font-size: 1.65rem;
-}
-
-.recipeTitle {
-  margin: 16px 0 8px;
-  font-size: clamp(2.4rem, 5vw, 3.4rem);
-  letter-spacing: -0.02em;
-}
-
-.meta {
-  margin: 0;
-  color: var(--pine);
-  font-weight: 500;
-}
-
-.byline,
-.detailLine {
-  margin: 4px 0 0;
-}
-
-.recipeButton .byline {
-  margin: 8px 16px 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--tomato-soft);
+  color: var(--tomato-text);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .notice {
   margin: 0;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: var(--lime-soft);
+  color: var(--lime-text);
+  font-size: 14px;
+  font-weight: 600;
 }
 
-.alert {
-  color: var(--chili);
-  margin: 8px 0 0;
-}
-
-.ingredients {
-  list-style: none;
+.empty {
   margin: 0;
-  padding: 0;
+  padding: 20px 16px;
+  color: var(--muted);
+  font-size: 15px;
 }
 
-.ingredients li {
-  display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr);
-  gap: 12px;
-  padding-block: 8px;
-  border-bottom: 1px solid var(--line);
-}
-
-.nameOnly {
-  grid-template-columns: 1fr;
-}
-
-.amount {
-  font-weight: 500;
-}
-
-.steps {
-  max-width: 65ch;
-  margin: 0;
-  padding-inline-start: 1.25rem;
-  font-size: 1.125rem;
-  line-height: 1.55;
-}
-
-.steps li {
-  margin-block: 0.75rem;
-  padding-inline-start: 0.35rem;
-}
-
-.sectionTitle {
-  margin: 20px 0 4px;
-  font-size: 1.5rem;
-  font-weight: 400;
-}
-
-.videoLink,
-.back {
-  color: var(--pine);
-  font-weight: 500;
-}
-
-.back {
-  display: inline-block;
-  margin-bottom: 12px;
-}
-
-.invite {
-  margin-top: 20px;
-  padding: 14px 0;
-  border-top: 1px solid var(--line);
-}
-
-.nav {
-  grid-area: nav;
-  display: flex;
-  flex-wrap: nowrap;
-  gap: 8px;
-  margin: 0;
-  overflow-x: auto;
-  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--line);
-  background: var(--paper);
-}
-
-.tab {
-  border: 0;
-  background: transparent;
-  color: var(--ink);
-  border-radius: 999px;
-  min-height: 40px;
-  padding: 6px 12px;
-  font: inherit;
-  font-size: 0.95rem;
-  white-space: nowrap;
-  cursor: pointer;
-}
-
-.tab[aria-current="page"] {
-  background: var(--pine);
-  border-color: var(--pine);
-  color: var(--paper);
-}
-
-.stock {
-  display: grid;
-  gap: 28px;
-}
-
-.stockSection {
-  margin: 0;
-  min-width: 0;
-  container-type: inline-size;
-}
-
-.stockList {
-  list-style: none;
-  margin: 12px 0 0;
-  padding: 0;
-}
-
-.stockRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  gap: 8px 12px;
-  align-items: center;
-  padding-block: 8px;
-  border-bottom: 1px solid var(--line);
-}
-
-.stockRow > span:first-child {
-  overflow-wrap: anywhere;
-}
-
-.stockRow > :last-child {
-  grid-column: -2;
-  grid-row: 1;
-}
-
-.stockCheck {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-}
-
-.stockEdit {
-  display: flex;
-  gap: 8px;
-  grid-column: 1 / -1;
-  grid-row: 2;
-}
-
-.stockEdit .amountField,
-.stockEdit .unitField {
-  flex: 1 1 0;
-}
-
-/* Wide enough: keep amount and unit on the same line as the name. */
-@container (min-width: 440px) {
-  .stockEdit {
-    grid-column: auto;
-    grid-row: auto;
-  }
-
-  .stockEdit .amountField,
-  .stockEdit .unitField {
-    flex: none;
-  }
-}
-
-.amountField,
-.unitField {
-  box-sizing: border-box;
-  min-width: 0;
-  width: 6.5rem;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--ink);
-  padding: 0.7rem 0.9rem;
-  font: inherit;
-}
-
-.stack,
-.stock {
-  max-width: 760px;
-}
-
-.stack {
-  display: grid;
-  gap: 18px;
-  width: 100%;
-  margin-inline: auto;
-}
-
-.guessStage {
-  position: relative;
-  min-height: 100%;
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 16px;
-  padding-block: 12px 28px;
-}
-
-.guessStage:focus-visible {
-  outline: 3px solid var(--yolk);
-  outline-offset: 6px;
-}
-
-.guessLead {
-  max-width: 36rem;
-  margin: 0;
-  text-align: center;
-}
-
-.live {
+.hidden {
   position: absolute;
   width: 1px;
   height: 1px;
-  padding: 0;
   margin: -1px;
+  padding: 0;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
-}
-
-.deck {
-  position: relative;
-  width: min(100%, 440px);
-  min-height: min(420px, 68dvh);
-  display: grid;
-  place-items: center;
-}
-
-.deckBack {
-  display: none;
-}
-
-.guessCard {
-  position: relative;
-  width: 100%;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: transparent;
-  padding: 40px 24px 24px;
-  min-height: min(380px, 62dvh);
-  display: grid;
-  align-content: center;
-  justify-items: center;
-  gap: 12px;
-  text-align: center;
-  touch-action: none;
-  user-select: none;
-  transition: transform 340ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  cursor: grab;
-}
-
-.guessCard[data-dragging="true"] {
-  transition: none;
-  cursor: grabbing;
-}
-
-.guessCard[data-flight="have"] {
-  transform: translateX(120%) rotate(12deg);
-}
-
-.guessCard[data-flight="skip"] {
-  transform: translateX(-120%) rotate(-12deg);
-}
-
-.guessCard[data-lean="have"] {
-  border-color: var(--pine);
-}
-
-.guessCard[data-lean="skip"] {
-  border-color: var(--chili);
-}
-
-.guessName {
-  margin: 0;
-  font-size: clamp(3rem, 12vw, 4.5rem);
-  letter-spacing: -0.03em;
-}
-
-.guessPlace {
-  margin: 0;
-  color: var(--pine);
-  font-weight: 500;
-}
-
-.guessActions {
-  display: flex;
-  direction: ltr;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.options {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.option {
-  border: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-  border-radius: 999px;
-  min-height: 44px;
-  padding: 8px 14px;
-  font: inherit;
-  cursor: pointer;
-}
-
-.option[aria-pressed="true"] {
-  background: var(--pine);
-  border-color: var(--pine);
-  color: var(--paper);
-}
-
-.wordList {
-  border: 0;
-  margin: 0;
-  padding: 0;
-}
-
-.chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  list-style: none;
-  margin: 0 0 8px;
-  padding: 0;
-}
-
-.chip {
-  border: 0;
-  border-radius: 999px;
-  background: var(--mist);
-  color: var(--ink);
-  font: inherit;
-  padding: 0.4rem 0.85rem;
-  cursor: pointer;
-}
-
-.ideaCard {
-  display: grid;
-  gap: 8px;
-  padding-block: 12px;
-  border-bottom: 1px solid var(--line);
-}
-
-@media (min-width: 960px) {
-  .shell {
-    grid-template-areas: "rail stage";
-    grid-template-columns: 232px minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);
-  }
-
-  .rail {
-    display: flex;
-    flex-direction: column;
-    grid-area: rail;
-    gap: 28px;
-    min-height: 0;
-    padding: 28px 18px;
-    border-inline-end: 1px solid var(--line);
-    overflow: auto;
-  }
-
-  .top {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0;
-  }
-
-  .nav {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-    padding: 0;
-    border: 0;
-    overflow: visible;
-  }
-
-  .tab {
-    text-align: start;
-  }
-
-  .stage {
-    padding: 32px 40px 48px;
-  }
-
-  .stock {
-    max-width: none;
-    grid-template-columns: 1fr 1fr;
-    align-items: start;
-  }
-
-  .workspace,
-  .workspaceRecipe {
-    display: grid;
-    grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.1fr);
-    gap: 36px;
-    align-items: start;
-  }
-
-  .listColumn,
-  .detailColumn,
-  .workspaceRecipe .listColumn {
-    display: block;
-  }
-
-  .detailColumn article {
-    max-width: 46rem;
-  }
 }

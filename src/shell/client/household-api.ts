@@ -1,6 +1,9 @@
 import { ApiError } from "../api";
 import type { CostReport } from "../../admin/admin.types";
+import type { RecipeView } from "../../domain/domain.types";
 import type { GuessDeck, GuessDecision } from "../../guess/guess.types";
+import type { MemberView } from "../../household/household.types";
+import type { ManualRecipeInput } from "../../library/manual/manual.types";
 import type { DietaryProfile } from "../../profile/profile.types";
 import type { ShopItemView } from "../../shop/shop.types";
 import type { SuggestionMix } from "../../suggest/suggest.types";
@@ -67,6 +70,18 @@ export async function removeShopItem(itemId: string): Promise<void> {
 /** Recipes the kitchen can make, and recipes that need a few items. */
 export async function fetchSuggestions(): Promise<SuggestionMix> {
   return readOk(await fetch("/api/suggestions"));
+}
+
+/** The people who share this kitchen. */
+export async function fetchMembers(): Promise<MemberView[]> {
+  return readOk(await fetch("/api/members"));
+}
+
+/** Save a recipe written by hand. */
+export async function saveManualRecipe(input: ManualRecipeInput): Promise<RecipeView> {
+  return readOk(
+    await fetch("/api/recipes/manual", { method: "POST", headers: jsonHeaders(), body: JSON.stringify(input) }),
+  );
 }
 
 /** Extraction costs. Throws not_admin when this account is not the owner. */

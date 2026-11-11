@@ -1,7 +1,8 @@
 import { useTranslation } from "react-i18next";
 import type { Locale } from "../../domain/domain.types";
 import { signInWithGoogle } from "../api";
-import styles from "../app.module.css";
+import app from "../app.module.css";
+import styles from "./sign-in.module.css";
 import { applyLocale } from "../i18n";
 import type { AppRoute } from "../shell.types";
 
@@ -22,48 +23,47 @@ export function SignIn({
   const callbackURL = route.name === "invite" ? `/invite/${encodeURIComponent(route.token)}` : "/";
 
   return (
-    <main className={`${styles.page} ${styles.signIn}`}>
-      <h1 className={styles.brand}>Foody</h1>
-      <div className={styles.brandRule} />
-      <p className={styles.lead}>{t("signIn.lead")}</p>
-      {route.name === "invite" ? <p>{t("signIn.invite")}</p> : null}
-      {route.authError === "failed" ? <p className={styles.alert}>{t("signIn.failed")}</p> : null}
-      {route.authError === "unconfigured" || !google ? <p>{t("signIn.unconfigured")}</p> : null}
-      {loadError ? (
-        <p>
-          {t("status.loadFailed")}{" "}
-          <button className={styles.textButton} type="button" onClick={onRetry}>
-            {t("status.retry")}
+    <main className={styles.screen}>
+      <div className={styles.top}>
+        <span className={styles.wordmark}>foody</span>
+        <div className={styles.languages}>
+          <button type="button" aria-pressed={locale === "en"} onClick={() => void applyLocale("en")}>
+            {t("settings.english")}
           </button>
-        </p>
-      ) : null}
-      {google ? (
-        <button className={styles.pineButton} type="button" onClick={() => void signInWithGoogle(callbackURL)}>
+          <button type="button" lang="he" aria-pressed={locale === "he"} onClick={() => void applyLocale("he")}>
+            {t("settings.hebrew")}
+          </button>
+        </div>
+      </div>
+      <div className={styles.art} aria-hidden="true">
+        <span className={styles.blobRound} />
+        <span className={styles.blobPeach} />
+        <span className={styles.blobInk} />
+      </div>
+      <div className={styles.body}>
+        <h1 className={styles.headline}>{t("signIn.headline")}</h1>
+        <p className={styles.lead}>{t("signIn.lead")}</p>
+        {route.name === "invite" ? <p className={styles.note}>{t("signIn.invite")}</p> : null}
+        {route.authError === "failed" ? <p className={app.alert}>{t("signIn.failed")}</p> : null}
+        {route.authError === "unconfigured" || !google ? (
+          <p className={styles.note}>{t("signIn.unconfigured")}</p>
+        ) : null}
+        {loadError ? (
+          <p className={styles.note}>
+            {t("status.loadFailed")}{" "}
+            <button className={styles.retry} type="button" onClick={onRetry}>
+              {t("status.retry")}
+            </button>
+          </p>
+        ) : null}
+        <button
+          className={`${app.dark} ${styles.google}`}
+          type="button"
+          disabled={!google}
+          onClick={() => void signInWithGoogle(callbackURL)}
+        >
           <GoogleMark />
           {t("signIn.button")}
-        </button>
-      ) : (
-        <button className={styles.pineButton} type="button" disabled>
-          <GoogleMark />
-          {t("signIn.button")}
-        </button>
-      )}
-      <div className={styles.controls}>
-        <button
-          type="button"
-          className={styles.choice}
-          aria-pressed={locale === "en"}
-          onClick={() => void applyLocale("en")}
-        >
-          {t("settings.english")}
-        </button>
-        <button
-          type="button"
-          className={styles.choice}
-          aria-pressed={locale === "he"}
-          onClick={() => void applyLocale("he")}
-        >
-          {t("settings.hebrew")}
         </button>
       </div>
     </main>

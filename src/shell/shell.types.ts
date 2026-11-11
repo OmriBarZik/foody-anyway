@@ -16,6 +16,12 @@ export type RecipeRoute = {
   authError: AuthError;
 };
 
+/** The form for a recipe written by hand. */
+export type NewRecipeRoute = {
+  name: "newRecipe";
+  authError: AuthError;
+};
+
 /** An invite link opened in the browser. */
 export type InviteRoute = {
   name: "invite";
@@ -24,7 +30,7 @@ export type InviteRoute = {
 };
 
 /** The shared fridge, freezer, pantry, and spices, plus the screens around them. */
-export type SectionName = "stock" | "guess" | "shop" | "ideas" | "profile" | "settings" | "costs";
+export type SectionName = "stock" | "guess" | "shop" | "ideas" | "me" | "costs";
 
 /** A kitchen screen that is not the video library. */
 export type SectionRoute = {
@@ -33,7 +39,7 @@ export type SectionRoute = {
 };
 
 /** Which screen the URL is showing. */
-export type AppRoute = LibraryRoute | RecipeRoute | InviteRoute | SectionRoute;
+export type AppRoute = LibraryRoute | RecipeRoute | NewRecipeRoute | InviteRoute | SectionRoute;
 
 /** Path plus a function that moves to another path without a reload. */
 export type RouteState = {
@@ -62,6 +68,7 @@ export type UiCopy = {
     retry: string;
   };
   signIn: {
+    headline: string;
     lead: string;
     button: string;
     unconfigured: string;
@@ -69,6 +76,17 @@ export type UiCopy = {
     invite: string;
   };
   library: {
+    title: string;
+    search: string;
+    all: string;
+    readyTonight: string;
+    seeAll: string;
+    allRecipes: string;
+    noMatch: string;
+    reading: string;
+    needsWork: string;
+    everythingIn: string;
+    missingCount: string;
     pasteLabel: string;
     save: string;
     saving: string;
@@ -79,6 +97,19 @@ export type UiCopy = {
     saveFailed: string;
   };
   recipe: {
+    backToRecipes: string;
+    watchOn: string;
+    inKitchen: string;
+    out: string;
+    outLabel: string;
+    addMissing: string;
+    addedMissing: string;
+    addFailed: string;
+    inStock: string;
+    outOfStock: string;
+    fromSource: string;
+    byHand: string;
+    sections: string;
     ingredients: string;
     steps: string;
     back: string;
@@ -121,6 +152,17 @@ export type UiCopy = {
     missing: string;
   };
   stock: {
+    title: string;
+    lead: string;
+    addItem: string;
+    quickCheck: string;
+    quickCheckSub: string;
+    less: string;
+    more: string;
+    inKitchenSwitch: string;
+    removeItem: string;
+    where: string;
+    cancel: string;
     videos: string;
     nav: string;
     name: string;
@@ -142,16 +184,18 @@ export type UiCopy = {
   };
   nav: {
     label: string;
-    videos: string;
-    stock: string;
-    guess: string;
-    shop: string;
-    ideas: string;
-    profile: string;
-    settings: string;
-    costs: string;
+    recipes: string;
+    kitchen: string;
+    add: string;
+    cook: string;
+    list: string;
+    me: string;
   };
   guess: {
+    title: string;
+    back: string;
+    left: string;
+    question: string;
     lead: string;
     have: string;
     skip: string;
@@ -161,6 +205,11 @@ export type UiCopy = {
     saveFailed: string;
   };
   shop: {
+    title: string;
+    left: string;
+    addPlaceholder: string;
+    forRecipe: string;
+    byHand: string;
     name: string;
     amount: string;
     unit: string;
@@ -171,6 +220,8 @@ export type UiCopy = {
     saveFailed: string;
   };
   ideas: {
+    title: string;
+    lead: string;
     ready: string;
     close: string;
     empty: string;
@@ -216,10 +267,80 @@ export type UiCopy = {
     total: string;
     loadFailed: string;
   };
+  add: {
+    title: string;
+    close: string;
+    link: string;
+    placeholder: string;
+    detected: string;
+    hint: string;
+    save: string;
+    byHand: string;
+  };
+  uploads: {
+    region: string;
+    reading: string;
+    readingSub: string;
+    failed: string;
+    failedSub: string;
+    badLink: string;
+    ready: string;
+    readySub: string;
+    retry: string;
+    open: string;
+    dismiss: string;
+    count: string;
+    expand: string;
+    collapse: string;
+  };
+  newRecipe: {
+    title: string;
+    close: string;
+    name: string;
+    namePlaceholder: string;
+    time: string;
+    timePlaceholder: string;
+    servings: string;
+    servingsPlaceholder: string;
+    ingredients: string;
+    amountN: string;
+    amountPlaceholder: string;
+    ingredientN: string;
+    ingredientPlaceholder: string;
+    removeIngredient: string;
+    addIngredient: string;
+    steps: string;
+    stepN: string;
+    stepPlaceholder: string;
+    removeStep: string;
+    addStep: string;
+    source: string;
+    optional: string;
+    sourcePlaceholder: string;
+    save: string;
+    saving: string;
+    bad: string;
+    failed: string;
+  };
+  me: {
+    back: string;
+    kitchen: string;
+    kitchenLead: string;
+    you: string;
+    owner: string;
+    member: string;
+    saved: string;
+    people: string;
+    profile: string;
+    settings: string;
+    costs: string;
+    ownerOnly: string;
+  };
   platforms: {
     youtube: string;
     tiktok: string;
     instagram: string;
     pinterest: string;
+    manual: string;
   };
 };

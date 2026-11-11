@@ -1,4 +1,4 @@
-import type { ExtractionStatus, Ingredient, RecipeStep, RecipeView, VideoPlatform } from "../domain/domain.types";
+import type { ExtractionStatus, Ingredient, RecipePlatform, RecipeStep, RecipeView } from "../domain/domain.types";
 import type { Db, RecipeListRow, RecipeWrite } from "./db.types";
 import { isRecord } from "../shared/is-record";
 
@@ -66,8 +66,8 @@ export async function insertRecipe({ db, recipe }: { db: Db; recipe: RecipeWrite
       `INSERT INTO recipes (
       id, household_id, saved_by_user_id, source_url, platform, thumbnail_url, dish_image_url,
       title, servings, cook_time, ingredients_json, steps_json, source_language, source_measurement,
-      extraction_status, extraction_note, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      extraction_status, extraction_note, source_note, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     )
     .run(
       recipe.id,
@@ -86,6 +86,7 @@ export async function insertRecipe({ db, recipe }: { db: Db; recipe: RecipeWrite
       recipe.sourceMeasurement,
       recipe.extractionStatus,
       recipe.extractionNote,
+      recipe.sourceNote ?? null,
       new Date().toISOString(),
     );
 }
@@ -131,6 +132,7 @@ export function toRecipeView(row: RecipeListRow): RecipeView {
     id: row.id,
     sourceUrl: row.source_url,
     platform: asPlatform(row.platform),
+    sourceNote: row.source_note ?? null,
     thumbnailUrl: row.thumbnail_url,
     dishImageUrl: row.dish_image_url,
     title: row.title,
@@ -147,8 +149,14 @@ export function toRecipeView(row: RecipeListRow): RecipeView {
   };
 }
 
-function asPlatform(value: string): VideoPlatform {
-  if (value === "youtube" || value === "tiktok" || value === "instagram" || value === "pinterest") {
+function asPlatform(value: string): RecipePlatform {
+  if (
+    value === "youtube" ||
+    value === "tiktok" ||
+    value === "instagram" ||
+    value === "pinterest" ||
+    value === "manual"
+  ) {
     return value;
   }
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { acceptInvite, ApiError, fetchInvite } from "../api";
-import styles from "../app.module.css";
+import app from "../app.module.css";
 
 /** Shows who invited you and joins that kitchen on purpose. */
 export function InviteBanner({ token, onJoined }: { token: string; onJoined: () => void }) {
@@ -49,15 +49,17 @@ export function InviteBanner({ token, onJoined }: { token: string; onJoined: () 
   }
 
   return (
-    <section className={styles.invite}>
-      {missing ? <p>{t("invite.missing")}</p> : null}
-      {householdName ? <p>{t("invite.lead", { name: householdName })}</p> : null}
-      {householdName ? (
-        <button className={styles.pineButton} type="button" disabled={joining} onClick={() => void join()}>
-          {joining ? t("invite.joining") : t("invite.join")}
-        </button>
-      ) : null}
-      {message ? <p>{message}</p> : null}
-    </section>
+    <div className={app.page} style={{ paddingBottom: 0 }}>
+      <section className={`${app.card} ${app.empty}`} style={{ display: "grid", gap: 12, color: "var(--ink)" }}>
+        {missing ? <p style={{ margin: 0 }}>{t("invite.missing")}</p> : null}
+        {householdName ? <p style={{ margin: 0 }}>{t("invite.lead", { name: householdName })}</p> : null}
+        {householdName ? (
+          <button className={app.primary} type="button" disabled={joining} onClick={() => void join()}>
+            {joining ? t("invite.joining") : t("invite.join")}
+          </button>
+        ) : null}
+        {message ? <p style={{ margin: 0 }}>{message}</p> : null}
+      </section>
+    </div>
   );
 }

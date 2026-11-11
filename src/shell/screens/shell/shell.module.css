@@ -1,0 +1,81 @@
+.shell {
+  min-height: 100dvh;
+  background: var(--bg);
+}
+
+.nav {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 20;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.navInner {
+  max-width: var(--page-width);
+  margin-inline: auto;
+  display: flex;
+  align-items: flex-start;
+  padding: 8px 8px 10px;
+  box-sizing: border-box;
+}
+
+.tab {
+  flex: 1;
+  min-height: 52px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tabIcon {
+  width: 52px;
+  height: 30px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 160ms ease;
+}
+
+.tab[aria-current="page"] {
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.tab[aria-current="page"] .tabIcon {
+  background: var(--lime);
+}
+
+.addSlot {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.addButton {
+  width: 56px;
+  height: 56px;
+  margin-top: -22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--lime);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 16px rgb(20 22 19 / 25%);
+  cursor: pointer;
+  transition: transform 120ms ease;
+}
+
+.addButton:active {
+  transform: scale(0.94);
+}

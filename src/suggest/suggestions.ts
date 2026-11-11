@@ -3,7 +3,7 @@ import { listRecipes } from "../db/recipes";
 import { listStock } from "../db/stock";
 import type { Ingredient, Locale, RecipeView, StockItemView } from "../domain/domain.types";
 import type { DietaryProfile } from "../profile/profile.types";
-import { sameFood } from "../shared/food";
+import { stockCovers } from "../shared/stock-covers";
 import { closeLimit, interestScore, profileBlocks } from "./filter-profile";
 import type { MissingIngredient, RankedSuggestion, SuggestionMix, SuggestionView } from "./suggest.types";
 
@@ -58,7 +58,7 @@ export function missingIngredients({
   locale: Locale;
 }): MissingIngredient[] {
   return recipe.ingredients
-    .filter((ingredient) => !stockCovers(stock, ingredient))
+    .filter((ingredient) => !stockCovers({ stock, ingredient }))
     .map((ingredient) => ({
       name: displayName({ ingredient, locale }),
       amount: ingredient.amount,
@@ -90,18 +90,6 @@ function toSuggestion({
     cookTime: recipe.cookTime,
     missing: missingIngredients({ recipe, stock, locale }),
   };
-}
-
-function stockCovers(stock: StockItemView[], ingredient: Ingredient): boolean {
-  const names = [ingredient.name, ingredient.nameEn, ingredient.nameHe].filter((name): name is string => Boolean(name));
-
-  return stock.some((item) => {
-    if (item.location === "spices" && item.present === false) {
-      return false;
-    }
-
-    return names.some((name) => sameFood(item.name, name));
-  });
 }
 
 function displayName({ ingredient, locale }: { ingredient: Ingredient; locale: Locale }): string {

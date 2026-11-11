@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { useSession } from "./use-session";
 import { useRoute } from "./use-route";
 import styles from "./app.module.css";
-import { Kitchen } from "./screens/kitchen";
+import { Kitchen } from "./screens/shell/kitchen";
 import { SignIn } from "./screens/sign-in";
 
 /** Foody shell: sign-in, then the shared kitchen. */
@@ -13,7 +13,7 @@ export function App() {
 
   if (session.status === "loading") {
     return (
-      <main className={styles.page}>
+      <main className={styles.loading}>
         <p>{t("status.loading")}</p>
       </main>
     );

@@ -68,6 +68,7 @@ export type RecipeRow = {
   source_measurement: string | null;
   extraction_status: string;
   extraction_note: string | null;
+  source_note: string | null;
   created_at: string;
 };
 
@@ -94,6 +95,7 @@ export type RecipeWrite = {
   sourceMeasurement: string | null;
   extractionStatus: string;
   extractionNote: string | null;
+  sourceNote?: string | null;
 };
 
 /** A row in extraction_costs. */

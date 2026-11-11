@@ -3,16 +3,17 @@ import type { KeyboardEvent, PointerEvent } from "react";
 import { useTranslation } from "react-i18next";
 import type { GuessDeck, GuessDecision } from "../../../guess/guess.types";
 import { ApiError } from "../../api";
-import styles from "../../app.module.css";
+import { CloseIcon } from "../shell/icons";
 import { answerGuess, fetchGuess } from "../../client/household-api";
 import { useReducedMotion } from "../../motion/use-reduced-motion";
 import { GuessCard } from "./guess-card";
+import styles from "./guess.module.css";
 
 const SLIDE_MS = 340;
 const SWIPE_PX = 72;
 
 /** Swipe proposed staples into the kitchen or past them. */
-export function GuessScreen() {
+export function GuessScreen({ go }: { go: (path: string) => void }) {
   const { t } = useTranslation();
   const reducedMotion = useReducedMotion();
   const [deck, setDeck] = useState<GuessDeck | null>(null);
@@ -180,14 +181,31 @@ export function GuessScreen() {
   return (
     <section
       ref={deckRef}
-      className={styles.guessStage}
+      className={styles.stage}
       tabIndex={0}
-      aria-label={card?.name ?? t("nav.guess")}
+      aria-label={card?.name ?? t("guess.title")}
       aria-describedby="guess-lead"
       aria-keyshortcuts="ArrowLeft ArrowRight"
       onKeyDown={onKeyDown}
     >
-      <p className={styles.guessLead} id="guess-lead">
+      <header className={styles.top}>
+        <a
+          href="/stock"
+          className={styles.close}
+          aria-label={t("guess.back")}
+          onClick={(event) => {
+            event.preventDefault();
+            go("/stock");
+          }}
+        >
+          <CloseIcon size={22} strokeWidth={2.2} />
+        </a>
+        <p className={styles.progress}>
+          {t("guess.title")}
+          {deck?.card ? ` · ${t("guess.left", { count: deck.remaining })}` : null}
+        </p>
+      </header>
+      <p className={styles.lead} id="guess-lead">
         {t("guess.lead")}
       </p>
       <p className={styles.live} aria-live="polite">
@@ -216,8 +234,11 @@ export function GuessScreen() {
           onHave={() => choose({ decision: "have", keyed: false })}
         />
       ) : (
-        <p>{deck ? t("guess.empty") : null}</p>
+        <p className={styles.done}>{deck ? t("guess.empty") : null}</p>
       )}
+      <p className={styles.last} aria-hidden="true">
+        {announcement}
+      </p>
     </section>
   );
 }
