@@ -34,23 +34,36 @@ export async function assertPreviewSessionAllowed({
   db: Db;
   userId: string;
 }): Promise<void> {
-  if (!isPreviewOnly({ config })) {
+  if (await isPreviewSessionAllowed({ config, db, userId })) {
     return;
+  }
+
+  throw previewForbidden();
+}
+
+/** True off previews, and on a preview when the user is an admin (isAdmin or ADMIN_EMAILS). */
+export async function isPreviewSessionAllowed({
+  config,
+  db,
+  userId,
+}: {
+  config: AppConfig;
+  db: Db;
+  userId: string;
+}): Promise<boolean> {
+  if (!isPreviewOnly({ config })) {
+    return true;
   }
 
   const row = await db
     .query<{ isAdmin: boolean; email: string }>(`SELECT "isAdmin", email FROM "user" WHERE id = ?`)
     .get(userId);
 
-  if (row?.isAdmin === true) {
-    return;
+  if (!row) {
+    return false;
   }
 
-  if (row && config.adminEmails.includes(row.email.toLowerCase())) {
-    return;
-  }
-
-  throw previewForbidden();
+  return row.isAdmin === true || config.adminEmails.includes(row.email.toLowerCase());
 }
 
 function previewForbidden(): APIError {

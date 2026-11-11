@@ -6,6 +6,7 @@ import type { AppConfig } from "../config/config.types";
 import type { ConnectedDb } from "../db/db.types";
 import { createHouseholdForUser, findHouseholdForUser } from "../db/households";
 import { assertPreviewSessionAllowed, assertPreviewSignUpAllowed } from "./preview-access";
+import { previewSessionGuard } from "./preview-session-guard";
 
 /**
  * Better Auth instance for this process. Google is the only sign-in method.
@@ -89,6 +90,9 @@ export function createFoodyAuth({ db, config }: { db: ConnectedDb; config: AppCo
           },
         },
       },
+    },
+    hooks: {
+      before: previewSessionGuard({ config, db }),
     },
     plugins: authPlugins(config),
   });
