@@ -3,6 +3,7 @@ import type { RecipeView, UserView } from "../../../domain/domain.types";
 import app from "../../app.module.css";
 import { BackIcon } from "../shell/icons";
 import { initials } from "../shell/user-avatar";
+import { KitchenNameCard } from "./kitchen-name-card";
 import { MembersCard } from "./members-card";
 import styles from "./me.module.css";
 import { ProfileCard } from "./profile-card";
@@ -48,7 +49,8 @@ export function MeScreen({
           <p className={app.eyebrow}>{user.email}</p>
         </div>
       </header>
-      <MembersCard user={user} recipes={recipes} />
+      <MembersCard user={user} recipes={recipes} onUser={onUser} />
+      <KitchenNameCard user={user} onUser={onUser} />
       <ProfileCard />
       <SettingsCard user={user} go={go} onUser={onUser} onRefresh={onRefresh} />
     </div>

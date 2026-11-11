@@ -335,6 +335,16 @@ export type UiCopy = {
     settings: string;
     costs: string;
     ownerOnly: string;
+    kitchenName: string;
+    saveName: string;
+    savingName: string;
+    nameSaved: string;
+    nameFailed: string;
+    remove: string;
+    removeConfirm: string;
+    leave: string;
+    leaveConfirm: string;
+    removeFailed: string;
   };
   platforms: {
     youtube: string;
