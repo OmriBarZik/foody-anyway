@@ -1,4 +1,6 @@
-import type { AppConfig } from "./config.types";
+import type { AppConfig, Deployment } from "./config.types";
+
+const DEFAULT_PRODUCTION_ORIGIN = "https://www.foodyanyway.com";
 
 /** Read Foody's environment. Throws when production is missing SESSION_SECRET or DATABASE_URL. */
 export function readConfig(): AppConfig {
@@ -21,7 +23,9 @@ export function readConfig(): AppConfig {
 
   return {
     nodeEnv,
+    deployment: readDeployment(),
     appOrigin: readOrigin(),
+    productionOrigin: trimOrigin(process.env.PRODUCTION_ORIGIN) ?? DEFAULT_PRODUCTION_ORIGIN,
     databaseUrl,
     sessionSecret,
     googleClientId: blankToNull(process.env.GOOGLE_CLIENT_ID),
@@ -32,11 +36,21 @@ export function readConfig(): AppConfig {
   };
 }
 
+function readDeployment(): Deployment {
+  const vercelEnv = process.env.VERCEL_ENV?.trim();
+
+  if (vercelEnv === "production" || vercelEnv === "preview") {
+    return vercelEnv;
+  }
+
+  return "local";
+}
+
 function readOrigin(): string {
-  const configured = process.env.APP_ORIGIN?.trim();
+  const configured = trimOrigin(process.env.APP_ORIGIN);
 
   if (configured) {
-    return configured.replace(/\/$/, "");
+    return configured;
   }
 
   const vercelHost = process.env.VERCEL_URL?.trim();
@@ -46,6 +60,16 @@ function readOrigin(): string {
   }
 
   return "http://localhost:3000";
+}
+
+function trimOrigin(value: string | undefined): string | null {
+  const trimmed = value?.trim() ?? "";
+
+  if (!trimmed) {
+    return null;
+  }
+
+  return trimmed.replace(/\/$/, "");
 }
 
 function blankToNull(value: string | undefined): string | null {
