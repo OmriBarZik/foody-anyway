@@ -1,0 +1,216 @@
+.block {
+  display: block;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--track) 0%, var(--line-soft) 40%, var(--track) 80%) 0 0 / 300% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+.page {
+  pointer-events: none;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.eyebrow {
+  composes: block;
+  width: 96px;
+  height: 14px;
+}
+
+.title {
+  composes: block;
+  width: 180px;
+  height: 34px;
+}
+
+.circle {
+  composes: block;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+}
+
+.field {
+  composes: block;
+  height: 48px;
+  border-radius: var(--radius-field);
+}
+
+.sectionTitle {
+  composes: block;
+  width: 140px;
+  height: 22px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 12px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardImage {
+  composes: block;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+}
+
+.line {
+  composes: block;
+  height: 14px;
+}
+
+.lineShort {
+  composes: line;
+  width: 55%;
+}
+
+.list {
+  background: var(--surface);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 60px;
+  padding: 8px 16px;
+  box-sizing: border-box;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.row:last-child {
+  border-bottom: 0;
+}
+
+.rowText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.square {
+  composes: block;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.pill {
+  composes: block;
+  flex: 1;
+  height: 40px;
+  border-radius: 999px;
+}
+
+.hero {
+  composes: block;
+  height: 320px;
+  border-radius: 0;
+}
+
+.heroBody {
+  position: relative;
+  margin-top: -28px;
+  padding: 24px 20px 0;
+  border-radius: 28px 28px 0 0;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.heroTitle {
+  composes: block;
+  width: 75%;
+  height: 30px;
+}
+
+.chips {
+  display: flex;
+  gap: 8px;
+}
+
+.chip {
+  composes: block;
+  width: 84px;
+  height: 32px;
+  border-radius: 999px;
+}
+
+.bigCard {
+  composes: block;
+  height: 240px;
+  border-radius: var(--radius-card);
+}
+
+/* Bars of the same height as the real bottom bar, so nothing moves when it appears. */
+.nav {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 20;
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.navInner {
+  max-width: var(--page-width);
+  margin-inline: auto;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 70px;
+  padding: 0 16px;
+  box-sizing: border-box;
+}
+
+.navDot {
+  composes: block;
+  width: 40px;
+  height: 30px;
+  border-radius: 15px;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+
+  to {
+    background-position: 0 0;
+  }
+}
+
+@media (min-width: 720px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

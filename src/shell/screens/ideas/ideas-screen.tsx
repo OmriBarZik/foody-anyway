@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SuggestionMix, SuggestionView } from "../../../suggest/suggest.types";
 import app from "../../app.module.css";
-import { fetchSuggestions, shopForRecipe } from "../../client/household-api";
+import { queries } from "../../cache/queries";
+import { useCached, writeCache } from "../../cache/use-cached";
+import { shopForRecipe } from "../../client/household-api";
+import { IdeasSkeleton } from "../skeleton/skeletons";
 import { DishImage } from "../library/dish-image";
 import { ArrowIcon, CheckIcon, ForwardIcon } from "../shell/icons";
 import styles from "./ideas.module.css";
@@ -10,33 +13,19 @@ import styles from "./ideas.module.css";
 /** Saved recipes the kitchen can cook now, and ones a few items short, with a way to list what is missing. */
 export function IdeasScreen({ go }: { go: (path: string) => void }) {
   const { t } = useTranslation();
-  const [mix, setMix] = useState<SuggestionMix | null>(null);
+  const cached = useCached(queries.suggestions);
+  const mix: SuggestionMix | null = cached.data ?? null;
   const [added, setAdded] = useState<string[]>([]);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    void fetchSuggestions()
-      .then((next) => {
-        if (active) {
-          setMix(next);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setFailed(true);
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const [saveFailed, setFailed] = useState(false);
+  const failed = saveFailed || cached.failed;
 
   function addMissing(recipeId: string): void {
     setFailed(false);
     void shopForRecipe(recipeId)
-      .then(() => setAdded((current) => [...current, recipeId]))
+      .then((list) => {
+        writeCache({ key: queries.shop.key, data: list });
+        setAdded((current) => [...current, recipeId]);
+      })
       .catch(() => setFailed(true));
   }
 
@@ -52,6 +41,7 @@ export function IdeasScreen({ go }: { go: (path: string) => void }) {
         <h1 className={app.title}>{t("ideas.title")}</h1>
       </header>
       {failed ? <p className={app.alert}>{t("ideas.saveFailed")}</p> : null}
+      {!mix && !failed ? <IdeasSkeleton /> : null}
 
       {hero ? (
         <section className={styles.section}>

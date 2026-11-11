@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Locale, MeasurementSystem, RecipeView, StockItemView } from "../../../domain/domain.types";
+import type { Locale, MeasurementSystem, RecipeView } from "../../../domain/domain.types";
 import { displayIngredient } from "../../../library/convert-units";
 import { stockCovers } from "../../../shared/stock-covers";
-import { fetchStock } from "../../api";
+import { queries } from "../../cache/queries";
+import { useCached, writeCache } from "../../cache/use-cached";
+import { RecipeSkeleton } from "../skeleton/skeletons";
 import app from "../../app.module.css";
 import { shopForRecipe } from "../../client/household-api";
 import { BackIcon, PlusIcon } from "../shell/icons";
@@ -35,32 +37,21 @@ export function RecipeScreen({
   const { t, i18n } = useTranslation();
   const locale: Locale = i18n.language === "he" ? "he" : "en";
   const [tab, setTab] = useState<"ingredients" | "steps">("ingredients");
-  const [stock, setStock] = useState<StockItemView[] | null>(null);
+  // Without stock the recipe still reads fine; it just cannot mark what is out.
+  const stock = useCached(queries.stock).data ?? null;
   const [shopNote, setShopNote] = useState<"added" | "failed" | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    void fetchStock()
-      .then((items) => {
-        if (active) {
-          setStock(items);
-        }
-      })
-      // Without stock the recipe still reads fine; it just cannot mark what is out.
-      .catch(() => undefined);
-
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  if (missing || !recipe) {
+  if (missing) {
     return (
       <div className={app.page}>
         <BackLink go={go} />
-        <p className={app.empty}>{missing ? t("recipe.missing") : t("status.loading")}</p>
+        <p className={app.empty}>{t("recipe.missing")}</p>
       </div>
     );
+  }
+
+  if (!recipe) {
+    return <RecipeSkeleton />;
   }
 
   const current = recipe;
@@ -79,7 +70,10 @@ export function RecipeScreen({
   function addMissing(): void {
     setShopNote(null);
     void shopForRecipe(current.id)
-      .then(() => setShopNote("added"))
+      .then((list) => {
+        writeCache({ key: queries.shop.key, data: list });
+        setShopNote("added");
+      })
       .catch(() => setShopNote("failed"));
   }
 

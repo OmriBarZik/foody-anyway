@@ -42,7 +42,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 160ms ease;
+  transition:
+    background 160ms ease,
+    transform 120ms ease;
+}
+
+.tab:active .tabIcon {
+  transform: scale(0.9);
 }
 
 .tab[aria-current="page"] {

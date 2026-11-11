@@ -1,7 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { StockItemView, StockLocation } from "../../../domain/domain.types";
-import { ApiError, createStock, fetchStock, removeStock, saveStock } from "../../api";
+import { ApiError, createStock, removeStock, saveStock } from "../../api";
+import { queries } from "../../cache/queries";
+import { useCached } from "../../cache/use-cached";
+import { RowsSkeleton } from "../skeleton/skeletons";
 import app from "../../app.module.css";
 import { CloseIcon, ForwardIcon, PlusIcon } from "../shell/icons";
 import { AddStockItem } from "./add-stock";
@@ -13,31 +16,15 @@ const LOCATIONS: StockLocation[] = ["fridge", "freezer", "pantry", "spices"];
 /** The shared fridge, freezer, pantry and spices, one place at a time, plus the way into Quick check. */
 export function StockScreen({ go }: { go: (path: string) => void }) {
   const { t } = useTranslation();
-  const [items, setItems] = useState<StockItemView[]>([]);
+  const cached = useCached(queries.stock);
+  const items = cached.data ?? [];
+  const setItems = (update: (current: StockItemView[]) => StockItemView[]) =>
+    cached.set((current) => update(current ?? []));
+  const loaded = cached.data !== undefined;
   const [location, setLocation] = useState<StockLocation>("fridge");
   const [adding, setAdding] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-  const [errorCode, setErrorCode] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void fetchStock()
-      .then((next) => {
-        if (active) {
-          setItems(next);
-          setLoaded(true);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setErrorCode("save_failed");
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const [saveError, setErrorCode] = useState<string | null>(null);
+  const errorCode = saveError ?? (cached.failed ? "save_failed" : null);
 
   async function add(draft: Omit<StockItemView, "id">): Promise<boolean> {
     setErrorCode(null);
@@ -59,7 +46,7 @@ export function StockScreen({ go }: { go: (path: string) => void }) {
     const previous = items;
     setItems((current) => current.map((entry) => (entry.id === item.id ? item : entry)));
     void saveStock(item).catch((error: unknown) => {
-      setItems(previous);
+      setItems(() => previous);
       setErrorCode(error instanceof ApiError ? error.code : "save_failed");
     });
   }
@@ -69,7 +56,7 @@ export function StockScreen({ go }: { go: (path: string) => void }) {
     const previous = items;
     setItems((current) => current.filter((entry) => entry.id !== itemId));
     void removeStock(itemId).catch(() => {
-      setItems(previous);
+      setItems(() => previous);
       setErrorCode("save_failed");
     });
   }
@@ -150,6 +137,7 @@ export function StockScreen({ go }: { go: (path: string) => void }) {
         </p>
       ) : null}
 
+      {!loaded && !cached.failed ? <RowsSkeleton rows={6} /> : null}
       {loaded && shown.length === 0 ? <p className={app.empty}>{t("stock.empty")}</p> : null}
       {shown.length > 0 ? (
         <ul className={`${app.list} ${app.card}`}>

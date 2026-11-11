@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+import { queries } from "../../cache/queries";
+import { useCached } from "../../cache/use-cached";
 import { useTranslation } from "react-i18next";
 import type { RecipeView, UserView } from "../../../domain/domain.types";
 import type { MemberView } from "../../../household/household.types";
 import { createInvite } from "../../api";
 import app from "../../app.module.css";
-import { fetchMembers } from "../../client/household-api";
 import type { InviteButtonState } from "../../shell.types";
 import { InviteIcon } from "../shell/icons";
 import { initials } from "../shell/user-avatar";
@@ -13,24 +14,14 @@ import styles from "./me.module.css";
 /** Who shares this kitchen, how many recipes each has saved, and the invite link. */
 export function MembersCard({ user, recipes }: { user: UserView; recipes: RecipeView[] }) {
   const { t } = useTranslation();
-  const [members, setMembers] = useState<MemberView[]>([]);
+  // Without the list the card still shows the invite button.
+  const { data, reload } = useCached(queries.members);
+  const members: MemberView[] = data ?? [];
   const [inviteState, setInviteState] = useState<InviteButtonState>("idle");
 
   useEffect(() => {
-    let active = true;
-    void fetchMembers()
-      .then((next) => {
-        if (active) {
-          setMembers(next);
-        }
-      })
-      // Without the list the card still shows the invite button.
-      .catch(() => undefined);
-
-    return () => {
-      active = false;
-    };
-  }, [user.household.id]);
+    reload();
+  }, [reload, user.household.id]);
 
   async function invite(): Promise<void> {
     setInviteState("idle");

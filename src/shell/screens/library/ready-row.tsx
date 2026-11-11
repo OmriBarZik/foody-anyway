@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SuggestionView } from "../../../suggest/suggest.types";
 import app from "../../app.module.css";
-import { fetchSuggestions } from "../../client/household-api";
+import { queries } from "../../cache/queries";
+import { useCached } from "../../cache/use-cached";
 import { DishImage } from "./dish-image";
 import styles from "./library.module.css";
 
@@ -11,23 +11,9 @@ const LIMIT = 6;
 /** Saved recipes the kitchen can make now, or is one or two items away from. Hidden when there are none. */
 export function ReadyRow({ go }: { go: (path: string) => void }) {
   const { t } = useTranslation();
-  const [items, setItems] = useState<SuggestionView[]>([]);
-
-  useEffect(() => {
-    let active = true;
-    void fetchSuggestions()
-      .then((mix) => {
-        if (active) {
-          setItems([...mix.ready, ...mix.close].slice(0, LIMIT));
-        }
-      })
-      // The row is extra. When suggestions fail to load the list below still works.
-      .catch(() => undefined);
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  // The row is extra. When suggestions fail to load the list below still works.
+  const { data: mix } = useCached(queries.suggestions);
+  const items: SuggestionView[] = mix ? [...mix.ready, ...mix.close].slice(0, LIMIT) : [];
 
   if (items.length === 0) {
     return null;

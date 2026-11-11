@@ -1,12 +1,20 @@
 import { useEffect, useState } from "react";
 import type { AppRoute, AuthError, RouteState, SectionName } from "./shell.types";
 
+let navigation: "push" | "pop" = "push";
+
+/** Whether the last path change came from a link or from the back and forward buttons. */
+export function lastNavigation(): "push" | "pop" {
+  return navigation;
+}
+
 /** Keep the screen in sync with the path, without a router library. */
 export function useRoute(): RouteState {
   const [path, setPath] = useState(() => window.location.pathname + window.location.search);
 
   useEffect(() => {
     const onPop = () => {
+      navigation = "pop";
       setPath(window.location.pathname + window.location.search);
     };
     window.addEventListener("popstate", onPop);
@@ -17,6 +25,13 @@ export function useRoute(): RouteState {
   }, []);
 
   function go(next: string): void {
+    if (next === window.location.pathname + window.location.search) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+
+      return;
+    }
+
+    navigation = "push";
     window.history.pushState({}, "", next);
     setPath(next);
   }

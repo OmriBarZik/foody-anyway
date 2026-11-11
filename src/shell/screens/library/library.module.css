@@ -64,6 +64,7 @@
 }
 
 .railCard {
+  transition: transform 120ms ease;
   flex: none;
   width: 260px;
   border-radius: 22px;
@@ -128,6 +129,12 @@
   flex-direction: column;
   gap: 6px;
   text-decoration: none;
+  transition: transform 120ms ease;
+}
+
+.card:active,
+.railCard:active {
+  transform: scale(0.97);
 }
 
 .cardImage {
@@ -143,6 +150,12 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0;
+  transition: opacity 220ms ease;
+}
+
+.photo[data-loaded="true"] {
+  opacity: 1;
 }
 
 .placeholder {
