@@ -5,6 +5,7 @@ import type { RecipeView } from "../../../domain/domain.types";
 import { ApiError } from "../../api";
 import app from "../../app.module.css";
 import { saveManualRecipe } from "../../client/household-api";
+import { useKeyboardInset } from "../../use-keyboard-inset";
 import { CloseIcon } from "../shell/icons";
 import { IngredientRows, StepRows } from "./line-rows";
 import type { DraftIngredient, DraftStep } from "./new-recipe.types";
@@ -27,6 +28,7 @@ export function NewRecipeScreen({
   const [steps, setSteps] = useState<DraftStep[]>(() => [blankStep()]);
   const [saving, setSaving] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
+  const keyboardInset = useKeyboardInset();
 
   async function submit(event: FormEvent<HTMLFormElement>): Promise<void> {
     event.preventDefault();
@@ -128,7 +130,11 @@ export function NewRecipeScreen({
           </p>
         ) : null}
       </form>
-      <div className={styles.saveBar}>
+      <div
+        className={styles.saveBar}
+        data-keyboard={keyboardInset > 0 ? "open" : undefined}
+        style={{ bottom: keyboardInset }}
+      >
         <button type="submit" form="new-recipe" className={`${app.primary} ${styles.save}`} disabled={saving}>
           {saving ? t("newRecipe.saving") : t("newRecipe.save")}
         </button>

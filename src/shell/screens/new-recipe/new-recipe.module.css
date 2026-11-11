@@ -131,6 +131,11 @@
   border-top: 1px solid var(--line);
 }
 
+/* The keyboard already covers the home-indicator area, so the bar needs no extra room for it. */
+.saveBar[data-keyboard="open"] {
+  padding-bottom: 12px;
+}
+
 .save {
   width: 100%;
   max-width: calc(var(--page-width) - 32px);
