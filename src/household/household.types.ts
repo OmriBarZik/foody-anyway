@@ -13,3 +13,6 @@ export type MemberRow = {
   image: string | null;
   role: string;
 };
+
+/** What happened when someone left or was removed from a kitchen. */
+export type RemoveMemberStatus = "removed" | "left" | "forbidden" | "missing";

@@ -1,6 +1,6 @@
 import { ApiError } from "../api";
 import type { CostReport } from "../../admin/admin.types";
-import type { RecipeView } from "../../domain/domain.types";
+import type { RecipeView, UserView } from "../../domain/domain.types";
 import type { GuessDeck, GuessDecision } from "../../guess/guess.types";
 import type { MemberView } from "../../household/household.types";
 import type { ManualRecipeInput } from "../../library/manual/manual.types";
@@ -75,6 +75,18 @@ export async function fetchSuggestions(): Promise<SuggestionMix> {
 /** The people who share this kitchen. */
 export async function fetchMembers(): Promise<MemberView[]> {
   return readOk(await fetch("/api/members"));
+}
+
+/** Rename the kitchen. Throws not_owner when this person is not its owner. */
+export async function renameKitchen(name: string): Promise<UserView> {
+  return readOk(
+    await fetch("/api/household", { method: "PATCH", headers: jsonHeaders(), body: JSON.stringify({ name }) }),
+  );
+}
+
+/** Remove one person from the kitchen, or leave it when the id is your own. Returns the signed-in account as it is now. */
+export async function removeMember(memberId: string): Promise<UserView> {
+  return readOk(await fetch(`/api/members/${encodeURIComponent(memberId)}`, { method: "DELETE" }));
 }
 
 /** Save a recipe written by hand. */
