@@ -7,6 +7,9 @@ export type MeasurementSystem = "metric" | "imperial";
 /** A cooking video source the library accepts. */
 export type VideoPlatform = "youtube" | "tiktok" | "instagram" | "pinterest";
 
+/** Where a saved recipe came from: a video link, or written by hand. */
+export type RecipePlatform = VideoPlatform | "manual";
+
 /** How far reading a saved link got. */
 export type ExtractionStatus = "pending" | "ready" | "needs_review" | "failed";
 
@@ -52,7 +55,8 @@ export type UserView = {
 export type RecipeView = {
   id: string;
   sourceUrl: string;
-  platform: VideoPlatform;
+  platform: RecipePlatform;
+  sourceNote: string | null;
   thumbnailUrl: string | null;
   dishImageUrl: string | null;
   title: string | null;

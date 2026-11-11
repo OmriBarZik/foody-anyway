@@ -1,16 +1,18 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { SuggestionMix, SuggestionView } from "../../../suggest/suggest.types";
-import { ApiError } from "../../api";
-import styles from "../../app.module.css";
+import app from "../../app.module.css";
 import { fetchSuggestions, shopForRecipe } from "../../client/household-api";
+import { DishImage } from "../library/dish-image";
+import { ArrowIcon, CheckIcon, ForwardIcon } from "../shell/icons";
+import styles from "./ideas.module.css";
 
-/** Saved recipes the kitchen can cook, and recipes that need a few items. */
+/** Saved recipes the kitchen can cook now, and ones a few items short, with a way to list what is missing. */
 export function IdeasScreen({ go }: { go: (path: string) => void }) {
   const { t } = useTranslation();
   const [mix, setMix] = useState<SuggestionMix | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [errorCode, setErrorCode] = useState<string | null>(null);
+  const [added, setAdded] = useState<string[]>([]);
+  const [failed, setFailed] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -22,7 +24,7 @@ export function IdeasScreen({ go }: { go: (path: string) => void }) {
       })
       .catch(() => {
         if (active) {
-          setErrorCode("save_failed");
+          setFailed(true);
         }
       });
 
@@ -32,67 +34,128 @@ export function IdeasScreen({ go }: { go: (path: string) => void }) {
   }, []);
 
   function addMissing(recipeId: string): void {
-    setErrorCode(null);
-    setNotice(null);
+    setFailed(false);
     void shopForRecipe(recipeId)
-      .then(() => setNotice(t("ideas.added")))
-      .catch((error: unknown) => setErrorCode(error instanceof ApiError ? error.code : "save_failed"));
+      .then(() => setAdded((current) => [...current, recipeId]))
+      .catch(() => setFailed(true));
   }
 
   const ready = mix?.ready ?? [];
   const close = mix?.close ?? [];
+  const [hero, ...rest] = ready;
+  const open = (recipeId: string) => go(`/recipes/${recipeId}`);
 
   return (
-    <section className={styles.stack}>
-      <p>{t("ideas.note")}</p>
-      {errorCode ? <p className={styles.alert}>{t("ideas.saveFailed")}</p> : null}
-      {notice ? <p className={styles.notice}>{notice}</p> : null}
-      <SuggestionGroup title={t("ideas.ready")} items={ready} go={go} onAdd={addMissing} />
-      <SuggestionGroup title={t("ideas.close")} items={close} go={go} onAdd={addMissing} />
-      {mix && ready.length === 0 && close.length === 0 ? <p>{t("ideas.empty")}</p> : null}
-    </section>
+    <div className={app.page}>
+      <header className={app.headerText}>
+        <p className={app.eyebrow}>{t("ideas.lead")}</p>
+        <h1 className={app.title}>{t("ideas.title")}</h1>
+      </header>
+      {failed ? <p className={app.alert}>{t("ideas.saveFailed")}</p> : null}
+
+      {hero ? (
+        <section className={styles.section}>
+          <h2 className={styles.heading}>
+            <span className={styles.dotReady} aria-hidden="true" />
+            {t("ideas.ready")}
+          </h2>
+          <a
+            href={`/recipes/${hero.recipeId}`}
+            className={styles.hero}
+            onClick={(event) => {
+              event.preventDefault();
+              open(hero.recipeId);
+            }}
+          >
+            <span className={styles.heroImage}>
+              <DishImage seed={hero.recipeId} url={hero.thumbnailUrl} iconSize={64} />
+            </span>
+            <span className={styles.heroBody}>
+              <span className={app.rowText}>
+                <span className={styles.heroTitle}>{hero.title ?? t("ideas.open")}</span>
+                {hero.cookTime ? <span className={styles.heroMeta}>{hero.cookTime}</span> : null}
+              </span>
+              <span className={styles.go}>
+                <ArrowIcon size={22} strokeWidth={2.4} />
+              </span>
+            </span>
+          </a>
+          {rest.map((item) => (
+            <IdeaRow key={item.recipeId} item={item} onOpen={open} />
+          ))}
+        </section>
+      ) : null}
+
+      {close.length > 0 ? (
+        <section className={styles.section}>
+          <h2 className={styles.heading}>
+            <span className={styles.dotShort} aria-hidden="true" />
+            {t("ideas.close")}
+          </h2>
+          {close.map((item) => (
+            <article key={item.recipeId} className={styles.shortCard}>
+              <IdeaRow item={item} onOpen={open} flat />
+              <div className={styles.missing}>
+                <span className={styles.missingLabel}>{t("ideas.missing")}</span>
+                {item.missing.map((entry) => (
+                  <span key={entry.name} className={styles.missingChip}>
+                    {entry.name}
+                  </span>
+                ))}
+              </div>
+              {added.includes(item.recipeId) ? (
+                <p className={styles.added}>
+                  <CheckIcon size={16} strokeWidth={3} />
+                  {t("ideas.added")}
+                </p>
+              ) : (
+                <button type="button" className={app.outline} onClick={() => addMissing(item.recipeId)}>
+                  {t("ideas.addMissing")}
+                </button>
+              )}
+            </article>
+          ))}
+        </section>
+      ) : null}
+
+      {mix && ready.length === 0 && close.length === 0 ? <p className={app.empty}>{t("ideas.empty")}</p> : null}
+      <p className={styles.note}>{t("ideas.note")}</p>
+    </div>
   );
 }
 
-function SuggestionGroup({
-  title,
-  items,
-  go,
-  onAdd,
+function IdeaRow({
+  item,
+  onOpen,
+  flat = false,
 }: {
-  title: string;
-  items: SuggestionView[];
-  go: (path: string) => void;
-  onAdd: (recipeId: string) => void;
+  item: SuggestionView;
+  onOpen: (recipeId: string) => void;
+  flat?: boolean;
 }) {
   const { t } = useTranslation();
 
-  if (items.length === 0) {
-    return null;
-  }
-
   return (
-    <section>
-      <h2 className={styles.sectionTitle}>{title}</h2>
-      <ul className={styles.stockList}>
-        {items.map((item) => (
-          <li key={item.recipeId} className={styles.ideaCard}>
-            <button type="button" className={styles.textButton} onClick={() => go(`/recipes/${item.recipeId}`)}>
-              {item.title || t("ideas.open")}
-            </button>
-            {item.missing.length > 0 ? (
-              <p>
-                {t("ideas.missing")}: {item.missing.map((missing) => missing.name).join(", ")}
-              </p>
-            ) : null}
-            {item.missing.length > 0 ? (
-              <button type="button" className={styles.pineButton} onClick={() => onAdd(item.recipeId)}>
-                {t("ideas.addMissing")}
-              </button>
-            ) : null}
-          </li>
-        ))}
-      </ul>
-    </section>
+    <a
+      href={`/recipes/${item.recipeId}`}
+      className={flat ? styles.rowFlat : styles.row}
+      onClick={(event) => {
+        event.preventDefault();
+        onOpen(item.recipeId);
+      }}
+    >
+      <span className={styles.thumb}>
+        <DishImage seed={item.recipeId} url={item.thumbnailUrl} iconSize={28} />
+      </span>
+      <span className={app.rowText}>
+        <span className={app.rowTitle}>{item.title ?? t("ideas.open")}</span>
+        {item.cookTime ? <span className={app.rowSub}>{item.cookTime}</span> : null}
+      </span>
+      {flat ? null : (
+        <span className={styles.chevron}>
+          <ForwardIcon size={20} />
+        </span>
+      )}
+    </a>
   );
 }

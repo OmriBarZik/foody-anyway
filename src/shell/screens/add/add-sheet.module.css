@@ -1,0 +1,161 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  background: rgb(20 22 19 / 35%);
+  animation: fade 160ms ease;
+}
+
+.sheet {
+  position: absolute;
+  inset-inline: 12px;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  max-width: calc(var(--page-width) - 24px);
+  margin-inline: auto;
+  background: var(--surface);
+  border-radius: 28px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 16px 40px rgb(20 22 19 / 22%);
+  animation: rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-inline-start: 4px;
+  margin-bottom: 4px;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.linkBox {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 60px;
+  padding-inline: 8px 6px;
+  border: 2px solid var(--ink);
+  border-radius: 20px;
+  box-sizing: border-box;
+}
+
+.platform {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 11px;
+  background: var(--track);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    background 160ms ease,
+    color 160ms ease;
+}
+
+.platform[data-known="true"] {
+  background: var(--ink);
+  color: #fff;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 16px;
+}
+
+.save {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 16px;
+  background: var(--lime);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.save:disabled {
+  background: var(--track);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.save svg {
+  transform: scaleX(var(--flip, 1));
+}
+
+.hint {
+  margin: 6px 4px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.hint[data-error="true"] {
+  color: var(--tomato-text);
+}
+
+.hand {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: start;
+  cursor: pointer;
+}
+
+.hand span:nth-child(2) {
+  flex: 1;
+}
+
+.handArrow {
+  color: var(--muted);
+  display: flex;
+}
+
+:global([dir="rtl"]) .handArrow svg,
+:global([dir="rtl"]) .save svg {
+  transform: scaleX(-1);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+}

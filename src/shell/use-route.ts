@@ -29,8 +29,10 @@ const SECTION_PATHS: Record<string, SectionName> = {
   "/guess": "guess",
   "/shop": "shop",
   "/ideas": "ideas",
-  "/profile": "profile",
-  "/settings": "settings",
+  "/me": "me",
+  // Older links to the profile and settings pages open the merged page.
+  "/profile": "me",
+  "/settings": "me",
   "/costs": "costs",
 };
 
@@ -42,6 +44,10 @@ function parseRoute(path: string): AppRoute {
 
   if (invite?.[1]) {
     return { name: "invite", token: decodeURIComponent(invite[1]), authError };
+  }
+
+  if (url.pathname === "/recipes/new") {
+    return { name: "newRecipe", authError };
   }
 
   if (recipe?.[1]) {

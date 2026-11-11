@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import type { CostReport } from "../../../admin/admin.types";
 import type { UserView } from "../../../domain/domain.types";
 import { ApiError } from "../../api";
-import styles from "../../app.module.css";
+import app from "../../app.module.css";
+import { BackIcon } from "../shell/icons";
 import { fetchCosts } from "../../client/household-api";
 
 /** Extraction costs for the app owner. */
-export function CostsScreen({ user }: { user: UserView }) {
+export function CostsScreen({ user, go }: { user: UserView; go: (path: string) => void }) {
   const { t } = useTranslation();
   const [report, setReport] = useState<CostReport | null>(null);
   const [errorCode, setErrorCode] = useState<string | null>(user.isAdmin ? null : "not_admin");
@@ -35,32 +36,46 @@ export function CostsScreen({ user }: { user: UserView }) {
     };
   }, [user.isAdmin]);
 
-  if (errorCode === "not_admin") {
-    return <p>{t("costs.forbidden")}</p>;
-  }
-
-  if (errorCode) {
-    return <p className={styles.alert}>{t("costs.loadFailed")}</p>;
-  }
-
   const rows = report?.rows ?? [];
+  const back = (
+    <a
+      href="/me"
+      className={app.iconButton}
+      aria-label={t("me.back")}
+      onClick={(event) => {
+        event.preventDefault();
+        go("/me");
+      }}
+    >
+      <BackIcon size={22} strokeWidth={2.2} />
+    </a>
+  );
 
   return (
-    <section className={styles.stack}>
-      <h2 className={styles.sectionTitle}>{t("costs.title")}</h2>
-      {report ? <p>{t("costs.total", { usd: report.totalUsd.toFixed(4) })}</p> : null}
-      {report && rows.length === 0 ? <p>{t("costs.empty")}</p> : null}
-      <ul className={styles.stockList}>
-        {rows.map((row) => (
-          <li key={row.id} className={styles.stockRow}>
-            <span>{row.recipeTitle || row.recipeId}</span>
-            <span>
-              {row.origin} · ${row.usd.toFixed(4)}
-            </span>
-            <span>{row.provider}</span>
-          </li>
-        ))}
-      </ul>
-    </section>
+    <div className={app.page}>
+      {back}
+      <header className={app.headerText}>
+        <h1 className={app.title}>{t("costs.title")}</h1>
+        {report ? <p className={app.eyebrow}>{t("costs.total", { usd: report.totalUsd.toFixed(4) })}</p> : null}
+      </header>
+      {errorCode === "not_admin" ? <p className={app.empty}>{t("costs.forbidden")}</p> : null}
+      {errorCode && errorCode !== "not_admin" ? <p className={app.alert}>{t("costs.loadFailed")}</p> : null}
+      {report && rows.length === 0 ? <p className={app.empty}>{t("costs.empty")}</p> : null}
+      {rows.length > 0 ? (
+        <ul className={`${app.list} ${app.card}`}>
+          {rows.map((row) => (
+            <li key={row.id} className={app.row}>
+              <span className={app.rowText}>
+                <span className={app.rowTitle}>{row.recipeTitle || row.recipeId}</span>
+                <span className={app.rowSub}>
+                  {row.provider} · {row.origin}
+                </span>
+              </span>
+              <span className={app.rowTitle}>${row.usd.toFixed(4)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+    </div>
   );
 }

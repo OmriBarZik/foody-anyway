@@ -1,0 +1,142 @@
+.screen {
+  position: relative;
+  box-sizing: border-box;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding-block: calc(28px + env(safe-area-inset-top)) calc(40px + env(safe-area-inset-bottom));
+  padding-inline: max(24px, calc((100% - var(--page-width)) / 2 + 24px));
+  display: flex;
+  flex-direction: column;
+  background: var(--lime);
+  color: var(--ink);
+}
+
+.art {
+  position: relative;
+  flex: 1;
+  min-height: 220px;
+  margin-inline: calc(-1 * max(24px, calc((100vw - var(--page-width)) / 2 + 24px)));
+}
+
+.blobRound,
+.blobPeach,
+.blobInk {
+  position: absolute;
+}
+
+.blobRound {
+  top: 8%;
+  inset-inline-end: -60px;
+  width: 260px;
+  height: 260px;
+  border-radius: 999px;
+  background: #fff;
+}
+
+.blobPeach {
+  top: calc(8% + 80px);
+  inset-inline-end: 40px;
+  width: 120px;
+  height: 120px;
+  border-radius: 999px;
+  background: #f6dccb;
+}
+
+.blobInk {
+  bottom: 4%;
+  inset-inline-start: -40px;
+  width: 160px;
+  height: 160px;
+  border-radius: 40px;
+  background: var(--ink);
+  transform: rotate(14deg);
+}
+
+.top {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.wordmark {
+  font-family: var(--display);
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.languages {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 14px;
+  background: rgb(255 255 255 / 55%);
+}
+
+.languages button {
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.languages button[aria-pressed="true"] {
+  background: #fff;
+}
+
+.body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.headline {
+  margin: 0;
+  font-family: var(--display);
+  font-size: clamp(40px, 12vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 0.95;
+}
+
+.lead {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.45;
+  color: #2e3a10;
+}
+
+.note {
+  margin: 0;
+  font-size: 14px;
+  color: #2e3a10;
+}
+
+.retry {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.google {
+  margin-top: 12px;
+  width: 100%;
+  min-height: 56px;
+}
+
+.googleMark {
+  width: 22px;
+  height: 22px;
+  padding: 2px;
+  border-radius: 999px;
+  background: #fff;
+}

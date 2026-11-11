@@ -1,18 +1,21 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { parseIngredientLine } from "../../../library/parse-ingredient-line";
 import type { ShopItemView } from "../../../shop/shop.types";
 import { ApiError } from "../../api";
-import styles from "../../app.module.css";
+import app from "../../app.module.css";
 import { createShopItem, fetchShop, removeShopItem } from "../../client/household-api";
+import { CheckIcon, PlusIcon } from "../shell/icons";
+import styles from "./shop.module.css";
 
-/** Items to buy, added by hand. Recipe gaps are added from Ideas. */
+/** The shared shopping list. One field adds "2 lemons"; ticking an item off removes it from the list. */
 export function ShopScreen() {
   const { t } = useTranslation();
   const [items, setItems] = useState<ShopItemView[]>([]);
-  const [name, setName] = useState("");
-  const [amount, setAmount] = useState("");
-  const [unit, setUnit] = useState("");
+  const [bought, setBought] = useState<ShopItemView[]>([]);
+  const [draft, setDraft] = useState("");
+  const [loaded, setLoaded] = useState(false);
   const [errorCode, setErrorCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,6 +24,7 @@ export function ShopScreen() {
       .then((next) => {
         if (active) {
           setItems(next);
+          setLoaded(true);
         }
       })
       .catch(() => {
@@ -36,82 +40,99 @@ export function ShopScreen() {
 
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
-    const trimmed = name.trim();
+    const parsed = parseIngredientLine(draft);
 
-    if (!trimmed) {
+    if (!parsed) {
       return;
     }
 
     setErrorCode(null);
-    void createShopItem({
-      name: trimmed,
-      amount: amount.trim() === "" ? null : Number(amount),
-      unit: unit.trim() || null,
-    })
+    void createShopItem({ name: parsed.name, amount: parsed.amount, unit: parsed.unit })
       .then((next) => {
         setItems(next);
-        setName("");
-        setAmount("");
-        setUnit("");
+        setDraft("");
       })
-      .catch((error: unknown) => {
-        setErrorCode(error instanceof ApiError ? error.code : "save_failed");
-      });
+      .catch((error: unknown) => setErrorCode(error instanceof ApiError ? error.code : "save_failed"));
   }
 
-  function remove(itemId: string): void {
+  function tick(item: ShopItemView): void {
     setErrorCode(null);
-    void removeShopItem(itemId)
-      .then(() => setItems((current) => current.filter((item) => item.id !== itemId)))
-      .catch(() => setErrorCode("save_failed"));
+    setItems((current) => current.filter((entry) => entry.id !== item.id));
+    setBought((current) => [item, ...current]);
+    void removeShopItem(item.id).catch(() => {
+      setBought((current) => current.filter((entry) => entry.id !== item.id));
+      setItems((current) => [item, ...current]);
+      setErrorCode("save_failed");
+    });
   }
-
-  const error = errorCode === "bad_item" ? t("shop.badItem") : errorCode ? t("shop.saveFailed") : null;
 
   return (
-    <section className={styles.stack}>
-      {error ? <p className={styles.alert}>{error}</p> : null}
-      <form className={styles.pasteRow} onSubmit={submit}>
+    <div className={app.page}>
+      <header className={app.headerText}>
+        <p className={app.eyebrow}>{loaded ? t("shop.left", { count: items.length }) : " "}</p>
+        <h1 className={app.title}>{t("shop.title")}</h1>
+      </header>
+
+      <form className={styles.add} onSubmit={submit}>
         <input
-          className={styles.pasteField}
-          value={name}
-          placeholder={t("shop.name")}
-          aria-label={t("shop.name")}
-          onChange={(event) => setName(event.target.value)}
+          className={app.field}
+          value={draft}
+          placeholder={t("shop.addPlaceholder")}
+          aria-label={t("shop.add")}
+          onChange={(event) => setDraft(event.target.value)}
         />
-        <input
-          className={styles.amountField}
-          inputMode="decimal"
-          value={amount}
-          placeholder={t("shop.amount")}
-          aria-label={t("shop.amount")}
-          onChange={(event) => setAmount(event.target.value)}
-        />
-        <input
-          className={styles.unitField}
-          value={unit}
-          placeholder={t("shop.unit")}
-          aria-label={t("shop.unit")}
-          onChange={(event) => setUnit(event.target.value)}
-        />
-        <button className={styles.pineButton} type="submit">
-          {t("shop.add")}
+        <button type="submit" className={styles.addButton} aria-label={t("shop.add")}>
+          <PlusIcon size={22} strokeWidth={2.5} />
         </button>
       </form>
-      {items.length === 0 ? <p>{t("shop.empty")}</p> : null}
-      <ul className={styles.stockList}>
-        {items.map((item) => (
-          <li key={item.id} className={styles.stockRow}>
-            <span>{item.name}</span>
-            <span>
-              {item.amount} {item.unit}
-            </span>
-            <button type="button" className={styles.textButton} onClick={() => remove(item.id)}>
-              {t("shop.remove")}
-            </button>
-          </li>
-        ))}
-      </ul>
-    </section>
+
+      {errorCode ? (
+        <p className={app.alert} role="alert">
+          {errorCode === "bad_item" ? t("shop.badItem") : t("shop.saveFailed")}
+        </p>
+      ) : null}
+
+      {loaded && items.length === 0 && bought.length === 0 ? <p className={app.empty}>{t("shop.empty")}</p> : null}
+
+      {items.length + bought.length > 0 ? (
+        <ul className={`${app.list} ${app.card}`}>
+          {items.map((item) => (
+            <ShopLine key={item.id} item={item} done={false} onTick={() => tick(item)} />
+          ))}
+          {bought.map((item) => (
+            <ShopLine key={item.id} item={item} done onTick={() => undefined} />
+          ))}
+        </ul>
+      ) : null}
+    </div>
+  );
+}
+
+function ShopLine({ item, done, onTick }: { item: ShopItemView; done: boolean; onTick: () => void }) {
+  const { t } = useTranslation();
+  const amount = [item.amount, item.unit].filter((part) => part !== null && part !== "").join(" ");
+
+  return (
+    <li>
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={done}
+        aria-disabled={done}
+        className={styles.line}
+        onClick={done ? undefined : onTick}
+      >
+        <span className={styles.box} data-done={done ? "true" : "false"}>
+          {done ? <CheckIcon size={16} strokeWidth={3.2} /> : null}
+        </span>
+        <span className={app.rowText}>
+          <span className={styles.name} data-done={done ? "true" : "false"}>
+            {item.name}
+          </span>
+          <span className={app.rowSub}>{item.recipeId ? t("shop.forRecipe") : t("shop.byHand")}</span>
+        </span>
+        {amount ? <span className={styles.amount}>{amount}</span> : null}
+      </button>
+    </li>
   );
 }

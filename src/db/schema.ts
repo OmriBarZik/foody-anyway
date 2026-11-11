@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS recipes (
   household_id text not null references households (id) on delete cascade,
   saved_by_user_id text not null references "user" (id) on delete cascade,
   source_url text not null,
-  platform text not null check (platform in ('youtube', 'tiktok', 'instagram', 'pinterest')),
+  platform text not null,
   thumbnail_url text,
   dish_image_url text,
   title text,
@@ -98,6 +98,12 @@ CREATE TABLE IF NOT EXISTS recipes (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS recipes_household_url ON recipes (household_id, source_url);
+
+-- Recipes written by hand have platform 'manual'. The app checks the platform, so older
+-- databases drop the video-only check they were created with.
+ALTER TABLE recipes DROP CONSTRAINT IF EXISTS recipes_platform_check;
+
+ALTER TABLE recipes ADD COLUMN IF NOT EXISTS source_note text;
 
 CREATE TABLE IF NOT EXISTS extraction_costs (
   id text primary key,

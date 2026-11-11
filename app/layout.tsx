@@ -7,7 +7,14 @@ export const metadata = {
   description: "A shared kitchen for the videos you want to cook.",
 };
 
-/** The kitchen page, with the paper background and the Hebrew-capable fonts. */
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#f4f4f0",
+};
+
+/** The kitchen page, with the display and body fonts. Rubik covers Hebrew. */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
@@ -15,7 +22,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Rubik:wght@400;500;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap"
           rel="stylesheet"
         />
       </head>

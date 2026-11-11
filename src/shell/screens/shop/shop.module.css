@@ -1,0 +1,76 @@
+.add {
+  display: flex;
+  gap: 8px;
+}
+
+.addButton {
+  flex: none;
+  width: 52px;
+  height: 52px;
+  border: 0;
+  border-radius: var(--radius-field);
+  background: var(--ink);
+  color: var(--lime);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.line {
+  width: 100%;
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--line-soft);
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+}
+
+li:last-child .line {
+  border-bottom: 0;
+}
+
+.line[aria-disabled="true"] {
+  cursor: default;
+}
+
+.box {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  box-sizing: border-box;
+  border: 2px solid #c9cbc2;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 140ms ease;
+}
+
+.box[data-done="true"] {
+  border: 0;
+  background: var(--lime);
+}
+
+.name {
+  font-size: 16px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.name[data-done="true"] {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.amount {
+  flex: none;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
