@@ -1,11 +1,17 @@
 import { betterAuth } from "better-auth";
 import { nextCookies } from "better-auth/next-js";
+import { oAuthProxy } from "better-auth/plugins";
 
 import type { AppConfig } from "../config/config.types";
 import type { ConnectedDb } from "../db/db.types";
 import { createHouseholdForUser, findHouseholdForUser } from "../db/households";
+import { assertPreviewSessionAllowed, assertPreviewSignUpAllowed } from "./preview-access";
+import { previewSessionGuard } from "./preview-session-guard";
 
-/** Better Auth instance for this process. Google is the only sign-in method. */
+/**
+ * Better Auth instance for this process. Google is the only sign-in method.
+ * Preview deployments send Google's callback through production (OAuth proxy), and only admins may sign in there.
+ */
 export function createFoodyAuth({ db, config }: { db: ConnectedDb; config: AppConfig }) {
   const googleReady = Boolean(config.googleClientId && config.googleClientSecret);
 
@@ -52,6 +58,8 @@ export function createFoodyAuth({ db, config }: { db: ConnectedDb; config: AppCo
       user: {
         create: {
           before: async (user) => {
+            assertPreviewSignUpAllowed({ config, email: user.email });
+
             const row = await db.query<{ count: number }>(`SELECT COUNT(*)::int AS count FROM "user"`).get();
             const isFirstAccount = Number(row?.count ?? 0) === 0;
             const isListedAdmin = config.adminEmails.includes(user.email.toLowerCase());
@@ -75,26 +83,38 @@ export function createFoodyAuth({ db, config }: { db: ConnectedDb; config: AppCo
           },
         },
       },
+      session: {
+        create: {
+          before: async (session) => {
+            await assertPreviewSessionAllowed({ config, db, userId: session.userId });
+          },
+        },
+      },
     },
-    plugins: [nextCookies()],
+    hooks: {
+      before: previewSessionGuard({ config, db }),
+    },
+    plugins: authPlugins(config),
   });
 }
 
+// Production needs the proxy too: it runs Google's callback and hands the profile back to the preview.
+function authPlugins(config: AppConfig) {
+  if (config.deployment === "local") {
+    return [nextCookies()];
+  }
+
+  return [oAuthProxy({ productionURL: config.productionOrigin }), nextCookies()];
+}
+
+// The branch URL is trusted too so the OAuth proxy returns to whichever preview URL the admin opened.
 function trustedOrigins(appOrigin: string): string[] {
-  const origins = [appOrigin];
-  const vercelHost = process.env.VERCEL_URL?.trim();
+  const vercelHosts = [process.env.VERCEL_URL, process.env.VERCEL_BRANCH_URL]
+    .map((host) => host?.trim() ?? "")
+    .filter((host) => host.length > 0)
+    .map((host) => `https://${host}`);
 
-  if (!vercelHost) {
-    return origins;
-  }
-
-  const vercelOrigin = `https://${vercelHost}`;
-
-  if (origins.includes(vercelOrigin)) {
-    return origins;
-  }
-
-  return [...origins, vercelOrigin];
+  return [...new Set([appOrigin, ...vercelHosts])];
 }
 
 /** The auth object Foody route handlers call. */
