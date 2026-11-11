@@ -5,6 +5,7 @@ import { I18nextProvider } from "react-i18next";
 
 import { App } from "../../src/shell/app";
 import i18n, { initI18n, readStoredLocale } from "../../src/shell/i18n";
+import { BootSkeleton } from "../../src/shell/screens/skeleton/boot-skeleton";
 
 /** The kitchen shell. The path still decides the screen inside the client. */
 export default function KitchenPage() {
@@ -17,7 +18,7 @@ export default function KitchenPage() {
   }, []);
 
   if (!ready) {
-    return <main />;
+    return <BootSkeleton />;
   }
 
   return (

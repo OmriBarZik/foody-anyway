@@ -19,8 +19,8 @@
   --radius-card: 22px;
   --radius-field: 16px;
   --shadow-float: 0 10px 28px rgb(20 22 19 / 30%);
-  --display: "Bricolage Grotesque", Rubik, "Segoe UI", sans-serif;
-  --sans: Inter, Rubik, "Segoe UI", system-ui, sans-serif;
+  --display: var(--font-display), var(--font-hebrew), "Segoe UI", sans-serif;
+  --sans: var(--font-body), var(--font-hebrew), "Segoe UI", system-ui, sans-serif;
   --page-width: 560px;
   font-family: var(--sans);
   font-size: 16px;
@@ -50,6 +50,14 @@ textarea,
 select {
   font: inherit;
   color: inherit;
+}
+
+/* No double-tap zoom wait on links and buttons, so taps answer at once. */
+a,
+button,
+label,
+[role="tab"] {
+  touch-action: manipulation;
 }
 
 ::selection {

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { Locale, MeasurementSystem, UserView } from "../../../domain/domain.types";
 import { signOut, updateMe } from "../../api";
 import app from "../../app.module.css";
+import { clearCache } from "../../cache/use-cached";
 import { applyLocale } from "../../i18n";
 import { ForwardIcon } from "../shell/icons";
 import styles from "./me.module.css";
@@ -47,6 +48,7 @@ export function SettingsCard({
 
   async function onSignOut(): Promise<void> {
     await signOut();
+    clearCache();
     go("/");
     await onRefresh();
   }

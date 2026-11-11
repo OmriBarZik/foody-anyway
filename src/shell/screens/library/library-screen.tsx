@@ -7,16 +7,19 @@ import { UserAvatar } from "../shell/user-avatar";
 import styles from "./library.module.css";
 import { ReadyRow } from "./ready-row";
 import { RecipeCard } from "./recipe-card";
+import { CardGridSkeleton } from "../skeleton/skeletons";
 
 /** The household's saved recipes: search, filter by source, and what can be cooked tonight. */
 export function LibraryScreen({
   user,
   recipes,
+  loading,
   loadFailed,
   go,
 }: {
   user: UserView;
   recipes: RecipeView[];
+  loading: boolean;
   loadFailed: boolean;
   go: (path: string) => void;
 }) {
@@ -84,8 +87,9 @@ export function LibraryScreen({
       {browsing && recipes.length > 0 ? <ReadyRow go={go} /> : null}
 
       <section className={styles.section}>
+        {loading ? <CardGridSkeleton /> : null}
         {recipes.length > 0 ? <h2 className={app.sectionTitle}>{t("library.allRecipes")}</h2> : null}
-        {recipes.length === 0 && !loadFailed ? <p className={app.empty}>{t("library.empty")}</p> : null}
+        {recipes.length === 0 && !loadFailed && !loading ? <p className={app.empty}>{t("library.empty")}</p> : null}
         {recipes.length > 0 && shown.length === 0 ? <p className={app.empty}>{t("library.noMatch")}</p> : null}
         <ul className={styles.grid}>
           {shown.map((recipe) => (

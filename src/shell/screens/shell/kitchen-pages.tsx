@@ -17,6 +17,7 @@ export function KitchenPages({
   route,
   go,
   recipes,
+  recipesLoading,
   loadFailed,
   recipe,
   missing,
@@ -31,6 +32,7 @@ export function KitchenPages({
   route: AppRoute;
   go: (path: string) => void;
   recipes: RecipeView[];
+  recipesLoading: boolean;
   loadFailed: boolean;
   recipe: RecipeView | null;
   missing: boolean;
@@ -88,7 +90,7 @@ export function KitchenPages({
       {route.name === "invite" ? (
         <InviteBanner token={route.token} onJoined={() => void onRefresh().then(() => go("/"))} />
       ) : null}
-      <LibraryScreen user={user} recipes={recipes} loadFailed={loadFailed} go={go} />
+      <LibraryScreen user={user} recipes={recipes} loading={recipesLoading} loadFailed={loadFailed} go={go} />
     </>
   );
 }

@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import type { AppRoute } from "../../shell.types";
 import { CookIcon, KitchenIcon, ListIcon, PlusIcon, RecipesIcon } from "./icons";
 import styles from "./shell.module.css";
+import { prefetchFor } from "./use-prefetch-tabs";
 
 type Tab = {
   path: string;
@@ -53,6 +54,7 @@ function NavTab({ tab, go }: { tab: Tab; go: (path: string) => void }) {
       href={tab.path}
       className={styles.tab}
       aria-current={tab.current ? "page" : undefined}
+      onPointerDown={() => prefetchFor(tab.path)}
       onClick={(event) => {
         event.preventDefault();
         go(tab.path);

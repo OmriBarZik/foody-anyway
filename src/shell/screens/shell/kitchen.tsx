@@ -1,6 +1,10 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { RecipeView, UserView } from "../../../domain/domain.types";
-import { ApiError, fetchRecipe, fetchRecipes, retryRecipe } from "../../api";
+import { ApiError, fetchRecipe, retryRecipe } from "../../api";
+import { queries } from "../../cache/queries";
+import { clearCache, useCached } from "../../cache/use-cached";
+import { prefetchTabs, usePrefetchTabs } from "./use-prefetch-tabs";
+import { useScrollMemory } from "./use-scroll-memory";
 import type { AppRoute } from "../../shell.types";
 import { AddSheet } from "../add/add-sheet";
 import { UploadAlerts } from "../uploads/upload-alerts";
@@ -26,8 +30,9 @@ export function Kitchen({
   onUser: (user: UserView) => void;
   onRefresh: () => Promise<void>;
 }) {
-  const [recipes, setRecipes] = useState<RecipeView[]>([]);
-  const [loadFailed, setLoadFailed] = useState(false);
+  const cached = useCached(queries.recipes);
+  const recipes = cached.data ?? [];
+  const reload = cached.reload;
   const [opened, setOpened] = useState<RecipeView | null>(null);
   const [missing, setMissing] = useState(false);
   const [retrying, setRetrying] = useState(false);
@@ -37,23 +42,23 @@ export function Kitchen({
   const listed = recipes.find((recipe) => recipe.id === selectedId) ?? null;
   const recipe = listed ?? (opened?.id === selectedId ? opened : null);
 
-  const reload = useCallback(() => {
-    void fetchRecipes()
-      .then((next) => {
-        setRecipes(next);
-        setLoadFailed(false);
-      })
-      .catch(() => setLoadFailed(true));
-  }, []);
-
   const uploads = useUploads({ onSaved: reload });
+  const household = useRef(user.household.id);
 
   useEffect(() => {
-    reload();
+    // Joining another kitchen changes every list; the first load already ran in the cache.
+    if (household.current !== user.household.id) {
+      household.current = user.household.id;
+      clearCache();
+      reload();
+      prefetchTabs();
+    }
   }, [reload, user.household.id]);
 
+  usePrefetchTabs();
+  useScrollMemory({ route, selectedId });
+
   useEffect(() => {
-    window.scrollTo(0, 0);
     setRetryError(null);
   }, [route.name, selectedId]);
 
@@ -104,7 +109,8 @@ export function Kitchen({
         route={route}
         go={go}
         recipes={recipes}
-        loadFailed={loadFailed}
+        recipesLoading={cached.data === undefined && !cached.failed}
+        loadFailed={cached.failed}
         recipe={recipe}
         missing={missing}
         retrying={retrying}

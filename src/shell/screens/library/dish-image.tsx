@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { PlateIcon } from "../shell/icons";
 import styles from "./library.module.css";
 
@@ -21,8 +22,27 @@ export function DishImage({
   iconSize?: number;
   onError?: () => void;
 }) {
+  const [loaded, setLoaded] = useState<string | null>(null);
+
   if (url) {
-    return <img className={styles.photo} src={url} alt="" loading="lazy" onError={onError} />;
+    return (
+      <img
+        className={styles.photo}
+        src={url}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        data-loaded={loaded === url ? "true" : "false"}
+        // A photo already in the browser cache is complete before onLoad can fire.
+        ref={(image) => {
+          if (image?.complete && image.naturalWidth > 0 && loaded !== url) {
+            setLoaded(url);
+          }
+        }}
+        onLoad={() => setLoaded(url)}
+        onError={onError}
+      />
+    );
   }
 
   const [background, color] = TINTS[hash(seed) % TINTS.length] ?? ["#e3e7ee", "#7a8598"];

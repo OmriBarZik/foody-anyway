@@ -1,3 +1,4 @@
+import { Bricolage_Grotesque, Inter, Rubik } from "next/font/google";
 import type { ReactNode } from "react";
 
 import "../src/index.css";
@@ -14,18 +15,15 @@ export const viewport = {
   themeColor: "#f4f4f0",
 };
 
+// Next serves the fonts from this site and sizes the fallback to match, so text does not jump when they arrive.
+const display = Bricolage_Grotesque({ subsets: ["latin"], weight: ["600", "700", "800"], variable: "--font-display" });
+const body = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-body" });
+const hebrew = Rubik({ subsets: ["latin", "hebrew"], weight: ["400", "500", "600", "700"], variable: "--font-hebrew" });
+
 /** The kitchen page, with the display and body fonts. Rubik covers Hebrew. */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="en" className={`${display.variable} ${body.variable} ${hebrew.variable}`}>
       <body>{children}</body>
     </html>
   );

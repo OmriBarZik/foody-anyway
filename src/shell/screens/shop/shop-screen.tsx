@@ -1,42 +1,29 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { parseIngredientLine } from "../../../library/parse-ingredient-line";
 import type { ShopItemView } from "../../../shop/shop.types";
 import { ApiError } from "../../api";
 import app from "../../app.module.css";
-import { createShopItem, fetchShop, removeShopItem } from "../../client/household-api";
+import { queries } from "../../cache/queries";
+import { useCached } from "../../cache/use-cached";
+import { createShopItem, removeShopItem } from "../../client/household-api";
+import { RowsSkeleton } from "../skeleton/skeletons";
 import { CheckIcon, PlusIcon } from "../shell/icons";
 import styles from "./shop.module.css";
 
 /** The shared shopping list. One field adds "2 lemons"; ticking an item off removes it from the list. */
 export function ShopScreen() {
   const { t } = useTranslation();
-  const [items, setItems] = useState<ShopItemView[]>([]);
+  const cached = useCached(queries.shop);
+  const items = cached.data ?? [];
+  const setItems = (update: ShopItemView[] | ((current: ShopItemView[]) => ShopItemView[])) =>
+    cached.set((current) => (typeof update === "function" ? update(current ?? []) : update));
+  const loaded = cached.data !== undefined;
   const [bought, setBought] = useState<ShopItemView[]>([]);
   const [draft, setDraft] = useState("");
-  const [loaded, setLoaded] = useState(false);
-  const [errorCode, setErrorCode] = useState<string | null>(null);
-
-  useEffect(() => {
-    let active = true;
-    void fetchShop()
-      .then((next) => {
-        if (active) {
-          setItems(next);
-          setLoaded(true);
-        }
-      })
-      .catch(() => {
-        if (active) {
-          setErrorCode("save_failed");
-        }
-      });
-
-    return () => {
-      active = false;
-    };
-  }, []);
+  const [saveError, setErrorCode] = useState<string | null>(null);
+  const errorCode = saveError ?? (cached.failed ? "save_failed" : null);
 
   function submit(event: FormEvent<HTMLFormElement>): void {
     event.preventDefault();
@@ -92,6 +79,7 @@ export function ShopScreen() {
         </p>
       ) : null}
 
+      {!loaded && !cached.failed ? <RowsSkeleton rows={5} /> : null}
       {loaded && items.length === 0 && bought.length === 0 ? <p className={app.empty}>{t("shop.empty")}</p> : null}
 
       {items.length + bought.length > 0 ? (
