@@ -1,8 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import type { FormEvent } from "react";
+import type { CSSProperties, FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { detectPlatform } from "../../../library/detect-platform";
 import app from "../../app.module.css";
+import { useKeyboardInset } from "../../use-keyboard-inset";
 import { ArrowIcon, CloseIcon, ForwardIcon, PencilIcon } from "../shell/icons";
 import styles from "./add-sheet.module.css";
 import { PlatformIcon } from "./platform-icon";
@@ -20,6 +21,7 @@ export function AddSheet({
   const { t } = useTranslation();
   const [url, setUrl] = useState("");
   const field = useRef<HTMLInputElement>(null);
+  const keyboardInset = useKeyboardInset();
   const detected = detectPlatform(url);
   const typed = url.trim().length > 0;
 
@@ -52,7 +54,14 @@ export function AddSheet({
   return (
     <div className={styles.layer}>
       <button type="button" className={styles.scrim} aria-label={t("add.close")} onClick={onClose} tabIndex={-1} />
-      <section className={styles.sheet} role="dialog" aria-modal="true" aria-labelledby="add-title">
+      <section
+        className={styles.sheet}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="add-title"
+        data-keyboard={keyboardInset > 0 ? "open" : undefined}
+        style={{ "--keyboard-inset": `${keyboardInset}px` } as CSSProperties}
+      >
         <div className={styles.head}>
           <h2 id="add-title" className={styles.title}>
             {t("add.title")}
