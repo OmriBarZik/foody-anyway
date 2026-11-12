@@ -1,33 +1,36 @@
-.layer {
-  position: fixed;
-  inset: 0;
-  z-index: 40;
-}
-
-.scrim {
-  position: absolute;
-  inset: 0;
-  border: 0;
-  padding: 0;
-  background: rgb(20 22 19 / 35%);
-  animation: fade 160ms ease;
-}
-
+/* A native modal <dialog>: the browser puts it in the top layer, so it needs no z-index or scrim element. */
 .sheet {
-  position: absolute;
-  inset-inline: 12px;
-  bottom: calc(28px + env(safe-area-inset-bottom));
+  position: fixed;
+  inset: auto 12px calc(28px + env(safe-area-inset-bottom));
+  width: auto;
   max-width: calc(var(--page-width) - 24px);
-  margin-inline: auto;
+  max-height: calc(100% - 56px);
+  margin: 0 auto;
+  border: 0;
+  color: var(--ink);
   background: var(--surface);
   border-radius: 28px;
   padding: 16px;
+  box-shadow: 0 16px 40px rgb(20 22 19 / 22%);
+  transition: bottom 160ms ease;
+  /* Scroll gestures inside the sheet must not scroll the page behind it. */
+  overscroll-behavior: contain;
+}
+
+/* Only an open dialog gets a display; setting it on every dialog would show a closed one. */
+.sheet[open] {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  box-shadow: 0 16px 40px rgb(20 22 19 / 22%);
-  transition: bottom 160ms ease;
   animation: rise 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.sheet::backdrop {
+  background: rgb(20 22 19 / 35%);
+  animation: fade 160ms ease;
+  /* ::backdrop is not a scroll container by default; with these, swiping on it does not scroll the page. */
+  overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 /* The keyboard is open: sit just above it, so the field and its save button stay in view. */

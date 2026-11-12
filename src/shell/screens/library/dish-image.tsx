@@ -15,11 +15,14 @@ export function DishImage({
   seed,
   url,
   iconSize = 40,
+  priority = false,
   onError,
 }: {
   seed: string;
   url: string | null;
   iconSize?: number;
+  /** The photo is the largest thing on screen when the page opens: fetch it first instead of lazily. */
+  priority?: boolean;
   onError?: () => void;
 }) {
   const [loaded, setLoaded] = useState<string | null>(null);
@@ -30,8 +33,9 @@ export function DishImage({
         className={styles.photo}
         src={url}
         alt=""
-        loading="lazy"
-        decoding="async"
+        loading={priority ? undefined : "lazy"}
+        fetchPriority={priority ? "high" : undefined}
+        decoding={priority ? undefined : "async"}
         data-loaded={loaded === url ? "true" : "false"}
         // A photo already in the browser cache is complete before onLoad can fire.
         ref={(image) => {

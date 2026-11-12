@@ -34,6 +34,13 @@ export function WordChips({
   function onKey(event: KeyboardEvent<HTMLInputElement>): void {
     if (event.key === "Enter") {
       event.preventDefault();
+
+      // Enter also confirms a word typed with an IME (Japanese, Chinese, Korean); that Enter must not add a half-typed word.
+      // Safari reports isComposing as false on that keydown, but every browser gives it keyCode 229.
+      if (event.nativeEvent.isComposing || event.keyCode === 229) {
+        return;
+      }
+
       commit();
     }
 
