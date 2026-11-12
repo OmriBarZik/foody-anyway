@@ -58,7 +58,7 @@ export function IdeasScreen({ go }: { go: (path: string) => void }) {
             }}
           >
             <span className={styles.heroImage}>
-              <DishImage seed={hero.recipeId} url={hero.thumbnailUrl} iconSize={64} />
+              <DishImage seed={hero.recipeId} url={hero.thumbnailUrl} iconSize={64} priority />
             </span>
             <span className={styles.heroBody}>
               <span className={app.rowText}>

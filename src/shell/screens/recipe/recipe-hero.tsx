@@ -17,7 +17,7 @@ export function RecipeHero({ recipe, go }: { recipe: RecipeView; go: (path: stri
   return (
     <>
       <div className={styles.hero}>
-        <DishImage seed={recipe.id} url={image} iconSize={80} onError={() => setBroken(true)} />
+        <DishImage seed={recipe.id} url={image} iconSize={80} priority onError={() => setBroken(true)} />
         <a
           href="/"
           className={`${app.iconButton} ${styles.back}`}
